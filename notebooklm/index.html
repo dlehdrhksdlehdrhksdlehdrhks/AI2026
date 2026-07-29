@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>슬기로운 AI 탐구 생활 - AI 팩트체크 탐정단</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Noto Sans KR & Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans KR', 'sans-serif'],
+                    },
+                    colors: {
+                        dark: {
+                            900: '#0B0F19', // Main background
+                            800: '#151C2A', // Card background
+                            700: '#1E2738', // Higher surface
+                            600: '#2A364F', // Card border
+                        },
+                        brand: {
+                            500: '#3B82F6',
+                            600: '#2563EB',
+                            700: '#1D4ED8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans KR', sans-serif;
+            background-color: #0B0F19;
+            color: #F1F5F9;
+        }
+        .dark-grid {
+            background-size: 30px 30px;
+            background-image: 
+                radial-gradient(circle, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+        .tab-btn.active {
+            background-color: #2563EB;
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.35);
+        }
+        .glow-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glow-card:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 20px -5px rgba(59, 130, 246, 0.15);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1E2738;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2A364F;
+        }
+    </style>
+</head>
+<body class="bg-[#0B0F19] text-slate-100 dark-grid min-h-screen pb-16 selection:bg-blue-500 selection:text-white">
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-50 bg-[#0B0F19]/90 backdrop-blur-md border-b border-[#1E2738]">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchSection('dashboard')">
+                <div class="bg-blue-600 text-white w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shadow-lg shadow-blue-600/30">
+                    AI
+                </div>
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-lg text-slate-100 tracking-tight flex items-center gap-2">
+                        <span>AI 팩트체크 탐정단</span>
+                        <span class="text-[10px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-semibold">PortFolio</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium hidden sm:block">슬기로운 AI 탐구 생활 · 생성형 AI 활용 원칙</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2.5">
+                <a href="../index.html" class="flex items-center space-x-1.5 bg-[#151C2A] hover:bg-[#1E2738] text-slate-300 hover:text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl border border-[#232D3F] transition duration-200">
+                    <i class="fa-solid fa-house text-slate-400 text-xs"></i>
+                    <span>홈</span>
+                </a>
+                <button onclick="openBadgeModal()" class="flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl shadow-lg shadow-blue-600/25 transition duration-200 active:scale-95">
+                    <i class="fa-solid fa-award text-blue-200 text-sm"></i>
+                    <span>탐정 임명장</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-6xl mx-auto px-4 pt-6">
+
+        <!-- Navigation Tabs -->
+        <nav class="flex flex-wrap gap-1.5 mb-8 p-1.5 bg-[#151C2A] rounded-2xl border border-[#232D3F]">
+            <button onclick="switchSection('dashboard')" id="tab-dashboard" class="tab-btn active flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-300 hover:text-white">
+                <i class="fa-solid fa-compass"></i>
+                <span>탐정 본부</span>
+            </button>
+            <button onclick="switchSection('case1')" id="tab-case1" class="tab-btn flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:bg-[#1E2738] hover:text-slate-200">
+                <i class="fa-solid fa-ghost"></i>
+                <span>사건 1: 환각</span>
+            </button>
+            <button onclick="switchSection('case2')" id="tab-case2" class="tab-btn flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:bg-[#1E2738] hover:text-slate-200">
+                <i class="fa-solid fa-copyright"></i>
+                <span>사건 2: 저작권</span>
+            </button>
+            <button onclick="switchSection('case3')" id="tab-case3" class="tab-btn flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:bg-[#1E2738] hover:text-slate-200">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>사건 3: 보안</span>
+            </button>
+            <button onclick="switchSection('case4')" id="tab-case4" class="tab-btn flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:bg-[#1E2738] hover:text-slate-200">
+                <i class="fa-solid fa-scale-balanced"></i>
+                <span>사건 4: 윤리</span>
+            </button>
+            <button onclick="switchSection('pledge')" id="tab-pledge" class="tab-btn flex-1 min-w-[110px] py-2.5 px-3 rounded-xl font-bold text-xs sm:text-sm transition flex items-center justify-center gap-2 text-slate-400 hover:bg-[#1E2738] hover:text-slate-200">
+                <i class="fa-solid fa-scroll"></i>
+                <span>5대 원칙</span>
+            </button>
+        </nav>
+
+        <!-- SECTION 0: DASHBOARD -->
+        <section id="sec-dashboard" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="bg-[#151C2A] rounded-3xl p-6 sm:p-8 border border-[#232D3F] shadow-2xl relative overflow-hidden">
+                <div class="absolute -right-8 -bottom-8 opacity-5 text-9xl text-blue-400 pointer-events-none">
+                    <i class="fa-solid fa-user-secret"></i>
+                </div>
+                <div class="max-w-2xl relative z-10 space-y-4">
+                    <div class="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-semibold text-blue-400">
+                        <i class="fa-solid fa-sparkles text-xs"></i>
+                        <span>AI & Data Science Student Portfolio</span>
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white leading-tight">
+                        생성형 AI 똑똑하게 활용하는<br class="hidden sm:inline"> 특급 윤리 및 팩트체크 비법
+                    </h2>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        AI는 1,750억 개 이상의 파라미터를 가진 강력한 아이디어 뱅크입니다. 
+                        하지만 거짓말(환각)을 하거나, 저작권을 침해하고, 개인정보를 누설할 위험도 존재합니다. 
+                        팩트체크 탐정이 되어 4대 위험 사건과 해결 원칙을 수사해보세요!
+                    </p>
+                    <div class="pt-2 flex flex-wrap gap-3">
+                        <button onclick="switchSection('case1')" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-2.5 rounded-xl text-sm shadow-lg shadow-blue-600/25 transition duration-200 flex items-center gap-2">
+                            <span>수사 시작하기</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                        <button onclick="openQuizModal()" class="bg-[#1E2738] hover:bg-[#2A364F] text-slate-200 border border-[#232D3F] font-semibold px-4 py-2.5 rounded-xl text-sm transition duration-200 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-question text-blue-400"></i>
+                            <span>AI 자격 테스트</span>
+                        </button>
+                    </div>
+
+                    <!-- 수사 시작하기 하단 탐구 자료 버튼 그룹 -->
+                    <div class="pt-2 flex flex-wrap gap-2.5 border-t border-[#232D3F]/70">
+                        <button onclick="downloadPresentation()" class="bg-[#1B2333] hover:bg-[#1E2738] text-slate-300 hover:text-white border border-[#232D3F] hover:border-rose-500/40 text-xs font-semibold px-3.5 py-2 rounded-xl transition duration-200 flex items-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-file-powerpoint text-rose-400 text-xs"></i>
+                            <span>발표자료 다운로드</span>
+                        </button>
+                        <button onclick="openInfographicModal()" class="bg-[#1B2333] hover:bg-[#1E2738] text-slate-300 hover:text-white border border-[#232D3F] hover:border-purple-500/40 text-xs font-semibold px-3.5 py-2 rounded-xl transition duration-200 flex items-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-chart-pie text-purple-400 text-xs"></i>
+                            <span>인포그래픽 보기</span>
+                        </button>
+                        <button onclick="openVideoModal()" class="bg-[#1B2333] hover:bg-[#1E2738] text-slate-300 hover:text-white border border-[#232D3F] hover:border-emerald-500/40 text-xs font-semibold px-3.5 py-2 rounded-xl transition duration-200 flex items-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-circle-play text-emerald-400 text-xs"></i>
+                            <span>동영상 보기</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Identity & Overview Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- AI 정체 카드 -->
+                <div class="bg-[#151C2A] rounded-2xl p-6 border border-[#232D3F] glow-card space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-white">생성형 AI의 정체</h3>
+                            <p class="text-xs text-slate-400">How Generative AI Works</p>
+                        </div>
+                    </div>
+                    <ul class="space-y-2.5 text-xs sm:text-sm text-slate-300">
+                        <li class="flex items-start gap-2.5">
+                            <i class="fa-solid fa-circle-check text-blue-400 mt-1 text-xs"></i>
+                            <span><strong class="text-white">마법의 창작 도구:</strong> 자연어로 대화하고 글, 이미지, 코드를 빠르게 창작.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fa-solid fa-circle-check text-blue-400 mt-1 text-xs"></i>
+                            <span><strong class="text-white">초대형 파라미터:</strong> 수천억 개의 뉴런 신경망으로 문맥과 확률을 계산.</span>
+                        </li>
+                        <li class="flex items-start gap-2.5">
+                            <i class="fa-solid fa-circle-check text-blue-400 mt-1 text-xs"></i>
+                            <span><strong class="text-white">새로운 지식의 지평:</strong> 키워드 검색을 넘어 지식의 요약과 구조화 가능.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 명암 비교 카드 -->
+                <div class="bg-[#151C2A] rounded-2xl p-6 border border-[#232D3F] glow-card space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-lg">
+                            <i class="fa-solid fa-yin-yang"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-white">AI의 두 얼굴 (빛과 그림자)</h3>
+                            <p class="text-xs text-slate-400">Pros & Cons Evaluation</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-emerald-950/30 border border-emerald-500/20 rounded-xl p-3.5 space-y-1">
+                            <span class="font-bold text-emerald-400 block flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-plus text-[10px]"></i>
+                                <span>빛 (장점)</span>
+                            </span>
+                            <p class="text-slate-300 text-[11px] leading-relaxed">생산성 극대화, 브레인스토밍, 초안 고속 생성 및 문제해결 지원</p>
+                        </div>
+                        <div class="bg-rose-950/30 border border-rose-500/20 rounded-xl p-3.5 space-y-1">
+                            <span class="font-bold text-rose-400 block flex items-center gap-1.5">
+                                <i class="fa-solid fa-circle-minus text-[10px]"></i>
+                                <span>그림자 (위험)</span>
+                            </span>
+                            <p class="text-slate-300 text-[11px] leading-relaxed">환각 현상, 저작권 표절, 개인정보 누설, 알고리즘 편향성</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4대 사건 요약 네비게이터 -->
+            <div class="bg-[#151C2A] rounded-2xl p-6 border border-[#232D3F]">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="font-extrabold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-folder-open text-blue-400"></i>
+                        <span>탐정단 집중 수사 4대 사건 파일</span>
+                    </h3>
+                    <span class="text-xs text-slate-400 font-medium">카드를 클릭하여 상세 조사</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Case Card 1 -->
+                    <div onclick="switchSection('case1')" class="group p-4 rounded-xl border border-[#232D3F] bg-[#1B2333] hover:bg-[#1E2738] hover:border-blue-500/40 cursor-pointer transition duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-md">01. AI 윤리 & 원칙</span>
+                            <i class="fa-solid fa-shield text-slate-500 group-hover:text-blue-400 transition"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1 group-hover:text-blue-300 transition">환각 현상 검증</h4>
+                        <p class="text-[11px] text-slate-400 line-clamp-2">AI가 그럴듯하게 거짓말하는 원인과 3단계 팩트체크 수칙.</p>
+                        <div class="mt-3 flex gap-1 flex-wrap">
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#환각검증</span>
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#팩트체크</span>
+                        </div>
+                    </div>
+
+                    <!-- Case Card 2 -->
+                    <div onclick="switchSection('case2')" class="group p-4 rounded-xl border border-[#232D3F] bg-[#1B2333] hover:bg-[#1E2738] hover:border-purple-500/40 cursor-pointer transition duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-md">02. 저작권 & 출처</span>
+                            <i class="fa-solid fa-copyright text-slate-500 group-hover:text-purple-400 transition"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1 group-hover:text-purple-300 transition">표절 방지 & 인용</h4>
+                        <p class="text-[11px] text-slate-400 line-clamp-2">무단 복붙 금지, 주체적 새로쓰기 및 올바른 인용 양식 생성.</p>
+                        <div class="mt-3 flex gap-1 flex-wrap">
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#출처표기</span>
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#Rewriting</span>
+                        </div>
+                    </div>
+
+                    <!-- Case Card 3 -->
+                    <div onclick="switchSection('case3')" class="group p-4 rounded-xl border border-[#232D3F] bg-[#1B2333] hover:bg-[#1E2738] hover:border-emerald-500/40 cursor-pointer transition duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md">03. 정보 보안</span>
+                            <i class="fa-solid fa-lock text-slate-500 group-hover:text-emerald-400 transition"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1 group-hover:text-emerald-300 transition">개인정보 차단</h4>
+                        <p class="text-[11px] text-slate-400 line-clamp-2">민감 데이터 학습 유출 방지 및 프롬프트 보안 스캐너.</p>
+                        <div class="mt-3 flex gap-1 flex-wrap">
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#보안수칙</span>
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#가명화</span>
+                        </div>
+                    </div>
+
+                    <!-- Case Card 4 -->
+                    <div onclick="switchSection('case4')" class="group p-4 rounded-xl border border-[#232D3F] bg-[#1B2333] hover:bg-[#1E2738] hover:border-amber-500/40 cursor-pointer transition duration-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-md">04. 윤리 & 규제</span>
+                            <i class="fa-solid fa-scale-balanced text-slate-500 group-hover:text-amber-400 transition"></i>
+                        </div>
+                        <h4 class="font-bold text-white text-sm mb-1 group-hover:text-amber-300 transition">윤리적 편향성</h4>
+                        <p class="text-[11px] text-slate-400 line-clamp-2">고정관념 왜곡 차단 및 EU AI Act 등 글로벌 규제 트렌드.</p>
+                        <div class="mt-3 flex gap-1 flex-wrap">
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#AI윤리</span>
+                            <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded">#EUAIAct</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 1: CASE 1 - HALLUCINATION -->
+        <section id="sec-case1" class="hidden space-y-6">
+            <!-- Header Card -->
+            <div class="bg-[#151C2A] rounded-3xl p-6 border border-[#232D3F] shadow-xl">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                    <div>
+                        <span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold text-xs px-3 py-1 rounded-full tracking-wider inline-flex items-center gap-1.5">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>Risk Case #1</span>
+                        </span>
+                        <h2 class="text-2xl font-extrabold text-white mt-3">
+                            사건 1: 환각 현상 (Hallucination) 과 팩트 체크
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">
+                            AI는 사실 여부와 관계없이 확률적 최적화로 가장 그럴듯한 문장을 조립하는 기계적 한계가 있습니다.
+                        </p>
+                    </div>
+                    <div class="bg-[#1E2738] text-amber-400 border border-amber-500/20 font-medium px-3.5 py-2 rounded-xl text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-link-slash"></i>
+                        <span>가짜 URL & 출처 주의</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Examples & Demo -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- AI 황당 오류 사례 -->
+                <div class="bg-[#151C2A] border border-rose-500/20 rounded-2xl p-5 space-y-4">
+                    <h3 class="font-bold text-rose-400 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-bug"></i>
+                        <span>AI가 저지른 대표적 황당 오류 사례</span>
+                    </h3>
+                    <div class="bg-[#1B2333] p-4 rounded-xl border border-[#232D3F] text-xs space-y-1.5">
+                        <div class="font-bold text-white flex items-center gap-1.5">
+                            <span class="text-rose-400">●</span>
+                            <span>"세종대왕 맥북 투척 사건"</span>
+                        </div>
+                        <p class="text-slate-400 leading-relaxed">
+                            "조선왕조실록에 따르면 세종대왕이 훈민정음 창제 중 맥북의 성능에 크게 분노하여 맥북을 던졌다..." 는 가짜 소설을 사실처럼 답변.
+                        </p>
+                    </div>
+                    <div class="bg-[#1B2333] p-4 rounded-xl border border-[#232D3F] text-xs space-y-1.5">
+                        <div class="font-bold text-white flex items-center gap-1.5">
+                            <span class="text-rose-400">●</span>
+                            <span>"존재하지 않는 가짜 논문 및 저자 생성"</span>
+                        </div>
+                        <p class="text-slate-400 leading-relaxed">
+                            실제 존재하지 않는 논문 제목과 가짜 URL을 그럴듯한 서지 정보 형태로 제작하여 제공.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Interactive 3-Step Defense Skill -->
+                <div class="bg-[#151C2A] border border-[#232D3F] rounded-2xl p-5 space-y-4">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-blue-400"></i>
+                        <span>3단계 팩트 체크 방어술 (Accordion)</span>
+                    </h3>
+                    
+                    <div class="space-y-2.5">
+                        <div onclick="toggleStep(1)" class="cursor-pointer p-3.5 rounded-xl border border-[#232D3F] bg-[#1B2333] hover:border-blue-500/40 transition">
+                            <div class="flex items-center justify-between font-bold text-slate-200 text-xs sm:text-sm">
+                                <span>1단계: 근거 요구 (Proof Request)</span>
+                                <i id="step-icon-1" class="fa-solid fa-chevron-down text-slate-500 text-xs"></i>
+                            </div>
+                            <p id="step-content-1" class="text-xs text-slate-400 mt-2.5 hidden leading-relaxed pt-2 border-t border-[#232D3F]">
+                                AI에게 <strong>"이 주장의 공식 기관명이나 실제 학술 논문 제목을 제시해줘"</strong>라고 질의하세요. AI 대답은 기본적으로 가설 상태로 취급해야 합니다.
+                            </p>
+                        </div>
+
+                        <div onclick="toggleStep(2)" class="cursor-pointer p-3.5 rounded-xl border border-[#232D3F] bg-[#1B2333] hover:border-blue-500/40 transition">
+                            <div class="flex items-center justify-between font-bold text-slate-200 text-xs sm:text-sm">
+                                <span>2단계: 1차 자료 직접 검색 (Direct Verification)</span>
+                                <i id="step-icon-2" class="fa-solid fa-chevron-down text-slate-500 text-xs"></i>
+                            </div>
+                            <p id="step-content-2" class="text-xs text-slate-400 mt-2.5 hidden leading-relaxed pt-2 border-t border-[#232D3F]">
+                                AI 출처를 맹신하지 말고 교과서, 정부 공식 보고서, 데이터베이스(<strong>DBpia, RISS</strong>)에서 직접 1차 자료를 재검증합니다.
+                            </p>
+                        </div>
+
+                        <div onclick="toggleStep(3)" class="cursor-pointer p-3.5 rounded-xl border border-[#232D3F] bg-[#1B2333] hover:border-blue-500/40 transition">
+                            <div class="flex items-center justify-between font-bold text-slate-200 text-xs sm:text-sm">
+                                <span>3단계: 비판적 사고 검토 (Critical Thinking)</span>
+                                <i id="step-icon-3" class="fa-solid fa-chevron-down text-slate-500 text-xs"></i>
+                            </div>
+                            <p id="step-content-3" class="text-xs text-slate-400 mt-2.5 hidden leading-relaxed pt-2 border-t border-[#232D3F]">
+                                통계 수치, 인과관계, 시점의 앞뒤 논리적 모순을 인간 탐정의 <strong>비판적 사고력</strong>으로 최종 검토합니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mini Interactive Fact Check Quiz Tool -->
+            <div class="bg-[#151C2A] border border-blue-500/30 rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-extrabold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-vial text-blue-400"></i>
+                        <span>팩트 체크 탐정 테스트: AI 답변 중 거짓(환각)은?</span>
+                    </h3>
+                </div>
+                <p class="text-xs text-slate-400">아래 3가지 질문 답변 중 AI가 지어낸 환각 문항 하나를 찾아 선택하세요.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <button onclick="checkFactQuiz(1)" class="bg-[#1B2333] hover:bg-[#1E2738] border border-[#232D3F] hover:border-blue-500/40 p-4 rounded-xl text-left text-xs space-y-2 transition shadow-sm">
+                        <span class="font-bold text-blue-400 block">보기 A</span>
+                        <p class="text-slate-300">"세종대왕은 집현전 학자들과 함께 훈민정음을 창제하였다."</p>
+                    </button>
+                    <button onclick="checkFactQuiz(2)" class="bg-[#1B2333] hover:bg-[#1E2738] border border-[#232D3F] hover:border-blue-500/40 p-4 rounded-xl text-left text-xs space-y-2 transition shadow-sm">
+                        <span class="font-bold text-blue-400 block">보기 B</span>
+                        <p class="text-slate-300">"세종대왕은 훈민정음 창제 중 맥북의 오타 때문에 화가 나서 노트북을 던졌다."</p>
+                    </button>
+                    <button onclick="checkFactQuiz(3)" class="bg-[#1B2333] hover:bg-[#1E2738] border border-[#232D3F] hover:border-blue-500/40 p-4 rounded-xl text-left text-xs space-y-2 transition shadow-sm">
+                        <span class="font-bold text-blue-400 block">보기 C</span>
+                        <p class="text-slate-300">"생성형 AI는 수천억 개 이상의 파라미터 기반으로 확률적 문장을 조립한다."</p>
+                    </button>
+                </div>
+                <div id="fact-quiz-result" class="mt-4 p-3.5 rounded-xl hidden text-xs font-bold transition-all"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: CASE 2 - COPYRIGHT & CITATION -->
+        <section id="sec-case2" class="hidden space-y-6">
+            <!-- Header Card -->
+            <div class="bg-[#151C2A] rounded-3xl p-6 border border-[#232D3F] shadow-xl">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                    <div>
+                        <span class="bg-purple-500/10 text-purple-400 border border-purple-500/20 font-bold text-xs px-3 py-1 rounded-full tracking-wider inline-flex items-center gap-1.5">
+                            <i class="fa-solid fa-copyright"></i>
+                            <span>Risk Case #2</span>
+                        </span>
+                        <h2 class="text-2xl font-extrabold text-white mt-3">
+                            사건 2: 저작권 침해, 표절 그리고 올바른 출처 표기
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">
+                            AI 답변은 수많은 창작자들의 데이터를 기반으로 합니다. 무단 단순 복붙은 연구 부정행위에 해당합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copy Paste Warning & Rewriting attitude -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 주체적 학습 태도 -->
+                <div class="bg-[#151C2A] border border-[#232D3F] rounded-2xl p-5 space-y-3">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-pen-nib text-purple-400"></i>
+                        <span>주체적인 학습 태도 (Rewriting)</span>
+                    </h3>
+                    <ul class="space-y-3 text-xs text-slate-300">
+                        <li class="bg-[#1B2333] p-3.5 rounded-xl border border-[#232D3F]">
+                            <strong class="text-rose-400 block mb-1">❌ 단순 우회 꼼수 절대 금지</strong>
+                            GPT 탐지기를 속이기 위해 단어만 슬쩍 바꾸는 방식은 학술적 성장과 자기 사고력을 저해합니다.
+                        </li>
+                        <li class="bg-[#1B2333] p-3.5 rounded-xl border border-[#232D3F]">
+                            <strong class="text-emerald-400 block mb-1">💡 AI 초안은 단순 힌트일 뿐!</strong>
+                            AI가 제시한 초안을 참고하되, <strong>나만의 시각과 언어로 완전히 새로 쓰기(Rewriting)</strong>를 수행하세요.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- 출처 표기 방식 가이드 -->
+                <div class="bg-[#151C2A] border border-[#232D3F] rounded-2xl p-5 space-y-3">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-book-bookmark text-purple-400"></i>
+                        <span>표준 인용/출처 표기 양식</span>
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3 bg-[#1B2333] border border-purple-500/20 rounded-xl">
+                            <strong class="text-purple-300 block mb-1">APA Style:</strong>
+                            <code class="text-slate-300 font-mono text-[11px]">OpenAI. (2026). ChatGPT (May version) [Large language model]. https://chat.openai.com</code>
+                        </div>
+                        <div class="p-3 bg-[#1B2333] border border-blue-500/20 rounded-xl">
+                            <strong class="text-blue-300 block mb-1">MLA Style:</strong>
+                            <code class="text-slate-300 font-mono text-[11px]">"Prompt details" prompt. ChatGPT, version 2026, OpenAI, chat.openai.com.</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Citation Generator Tool -->
+            <div class="bg-[#151C2A] border border-purple-500/30 rounded-2xl p-6 shadow-xl space-y-4">
+                <h3 class="font-extrabold text-white text-base flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i>
+                    <span>인터랙티브 AI 인용/출처 생성기</span>
+                </h3>
+                <p class="text-xs text-slate-400">보고서나 과제에 즉시 첨부 가능한 표준 AI 출처 표기 문구를 자동 생성합니다.</p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1.5">사용 AI 도구</label>
+                        <select id="cite-ai" class="w-full bg-[#1B2333] text-slate-200 p-2.5 border border-[#232D3F] rounded-xl focus:border-purple-500 focus:outline-none">
+                            <option value="ChatGPT (OpenAI)">ChatGPT (OpenAI)</option>
+                            <option value="Gemini (Google)">Gemini (Google)</option>
+                            <option value="Claude (Anthropic)">Claude (Anthropic)</option>
+                            <option value="NotebookLM (Google)">NotebookLM (Google)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1.5">사용한 프롬프트 요약</label>
+                        <input id="cite-prompt" type="text" placeholder="예: 세종대왕 훈민정음 창제 배경 요약" class="w-full bg-[#1B2333] text-slate-200 p-2.5 border border-[#232D3F] rounded-xl focus:border-purple-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-300 mb-1.5">검증한 1차 교차 자료</label>
+                        <input id="cite-source" type="text" placeholder="예: 한국사 교과서 p.45" class="w-full bg-[#1B2333] text-slate-200 p-2.5 border border-[#232D3F] rounded-xl focus:border-purple-500 focus:outline-none">
+                    </div>
+                </div>
+
+                <button onclick="generateCitation()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl text-xs transition shadow-lg shadow-purple-600/20">
+                    출처 표기 문구 생성하기
+                </button>
+
+                <div id="cite-output-box" class="hidden bg-[#0B0F19] border border-purple-500/30 text-slate-200 p-4 rounded-xl text-xs space-y-2 relative">
+                    <span class="text-purple-400 font-bold block">생성된 출처 표준 표기:</span>
+                    <p id="cite-output-text" class="font-mono leading-relaxed select-all text-slate-300 text-[11px]"></p>
+                    <button onclick="copyCitation()" class="absolute top-3 right-3 bg-[#1E2738] hover:bg-[#2A364F] text-slate-200 px-2.5 py-1 rounded-lg text-[10px] border border-[#232D3F]">
+                        <i class="fa-solid fa-copy"></i> 복사
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: CASE 3 - SECURITY -->
+        <section id="sec-case3" class="hidden space-y-6">
+            <!-- Header Card -->
+            <div class="bg-[#151C2A] rounded-3xl p-6 border border-[#232D3F] shadow-xl">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                    <div>
+                        <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold text-xs px-3 py-1 rounded-full tracking-wider inline-flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            <span>Risk Case #3</span>
+                        </span>
+                        <h2 class="text-2xl font-extrabold text-white mt-3">
+                            사건 3: 정보 유출 및 개인정보 보호
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">
+                            입력한 비밀번호, 개인식별 정보, 내부 비밀 데이터는 AI 학습 데이터 세트에 영구 흡수되어 유출될 위험이 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Iron Defense 5 Rules Checklist -->
+            <div class="bg-[#151C2A] border border-[#232D3F] rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <h3 class="font-extrabold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-lock text-emerald-400"></i>
+                        <span>철통 방어 5대 보안 수칙 체크리스트</span>
+                    </h3>
+                    <span id="security-score" class="text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                        안전도 Score: 0 / 5
+                    </span>
+                </div>
+
+                <div class="space-y-2.5 text-xs sm:text-sm">
+                    <label class="flex items-center p-3 bg-[#1B2333] rounded-xl hover:border-emerald-500/30 border border-[#232D3F] cursor-pointer transition">
+                        <input type="checkbox" onchange="updateSecurityScore()" class="sec-check w-4 h-4 text-emerald-600 rounded bg-[#0B0F19] border-[#232D3F] focus:ring-emerald-500 mr-3">
+                        <span class="text-slate-300"><strong class="text-white">1. 민감 정보 입력 금지:</strong> 계좌번호, 주민번호, 비밀번호 등 개인 식별 정보 절대 입력 금지.</span>
+                    </label>
+                    <label class="flex items-center p-3 bg-[#1B2333] rounded-xl hover:border-emerald-500/30 border border-[#232D3F] cursor-pointer transition">
+                        <input type="checkbox" onchange="updateSecurityScore()" class="sec-check w-4 h-4 text-emerald-600 rounded bg-[#0B0F19] border-[#232D3F] focus:ring-emerald-500 mr-3">
+                        <span class="text-slate-300"><strong class="text-white">2. 철저한 익명화/가명화:</strong> 특정 학교, 개인명, 기밀 단어는 익명 기호로 치환.</span>
+                    </label>
+                    <label class="flex items-center p-3 bg-[#1B2333] rounded-xl hover:border-emerald-500/30 border border-[#232D3F] cursor-pointer transition">
+                        <input type="checkbox" onchange="updateSecurityScore()" class="sec-check w-4 h-4 text-emerald-600 rounded bg-[#0B0F19] border-[#232D3F] focus:ring-emerald-500 mr-3">
+                        <span class="text-slate-300"><strong class="text-white">3. 학습 기능(Chat History) 비활성화:</strong> 대화가 AI 학습에 쓰이지 않도록 Off 설정.</span>
+                    </label>
+                    <label class="flex items-center p-3 bg-[#1B2333] rounded-xl hover:border-emerald-500/30 border border-[#232D3F] cursor-pointer transition">
+                        <input type="checkbox" onchange="updateSecurityScore()" class="sec-check w-4 h-4 text-emerald-600 rounded bg-[#0B0F19] border-[#232D3F] focus:ring-emerald-500 mr-3">
+                        <span class="text-slate-300"><strong class="text-white">4. 인증 키 대화 금지:</strong> API Key, OTP, 보안토큰 등 절대 질의에 포함하지 않기.</span>
+                    </label>
+                    <label class="flex items-center p-3 bg-[#1B2333] rounded-xl hover:border-emerald-500/30 border border-[#232D3F] cursor-pointer transition">
+                        <input type="checkbox" onchange="updateSecurityScore()" class="sec-check w-4 h-4 text-emerald-600 rounded bg-[#0B0F19] border-[#232D3F] focus:ring-emerald-500 mr-3">
+                        <span class="text-slate-300"><strong class="text-white">5. 다중 인증(MFA) 적용:</strong> 계정 해킹 및 데이터 도용 방지용 2차 인증 설정.</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Sensitive Data Prompt Filter Test -->
+            <div class="bg-[#151C2A] border border-emerald-500/30 rounded-2xl p-6 shadow-xl space-y-4">
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                    <i class="fa-solid fa-shield-virus text-emerald-400"></i>
+                    <span>보안 탐정 실습: 프롬프트 민감 정보 실시간 스캐너</span>
+                </h3>
+                <p class="text-xs text-slate-400">질문 전 위험 문구가 포함되어 있는지 자체 필터링을 거치세요.</p>
+
+                <div class="space-y-3">
+                    <textarea id="sec-input" rows="3" placeholder="예: 내 비밀번호는 1234이고 이름은 홍길동이야. 이 보고서 정제해줘." class="w-full text-xs p-3.5 rounded-xl bg-[#1B2333] text-slate-100 border border-[#232D3F] focus:border-emerald-500 focus:outline-none"></textarea>
+                    <button onclick="scanSensitiveData()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-xl text-xs transition shadow-lg shadow-emerald-600/20">
+                        민감 정보 스캔 실행
+                    </button>
+                </div>
+                <div id="sec-result" class="hidden p-3.5 rounded-xl text-xs font-semibold"></div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: CASE 4 - ETHICS & BIAS -->
+        <section id="sec-case4" class="hidden space-y-6">
+            <!-- Header Card -->
+            <div class="bg-[#151C2A] rounded-3xl p-6 border border-[#232D3F] shadow-xl">
+                <div class="flex items-start justify-between flex-wrap gap-4">
+                    <div>
+                        <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold text-xs px-3 py-1 rounded-full tracking-wider inline-flex items-center gap-1.5">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                            <span>Risk Case #4</span>
+                        </span>
+                        <h2 class="text-2xl font-extrabold text-white mt-3">
+                            사건 4: 윤리적 편향성 & 글로벌 규제 트렌드
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">
+                            AI는 인간의 편향된 과거 데이터 세트를 학습하여 편견을 재생산하거나 증폭시킬 수 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bias Examples & Global Trend Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 윤리적 편향 사례 -->
+                <div class="bg-[#151C2A] border border-[#232D3F] rounded-2xl p-5 space-y-3">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-scale-unbalanced text-amber-400"></i>
+                        <span>AI 편향성의 주요 위험 사례</span>
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3.5 bg-[#1B2333] border border-[#232D3F] rounded-xl space-y-1">
+                            <strong class="text-white block">🧑‍💼 성역할 및 고정관념 고착화</strong>
+                            <p class="text-slate-400 leading-relaxed">'CEO'나 '전문직' 이미지 생성 시 특정 인종/성별만 고의적으로 출력하는 알고리즘 편향성 문제.</p>
+                        </div>
+                        <div class="p-3.5 bg-[#1B2333] border border-[#232D3F] rounded-xl space-y-1">
+                            <strong class="text-white block">🗺️ 국가 및 문화적 왜곡</strong>
+                            <p class="text-slate-400 leading-relaxed">특정 서구권 데이터 위주 학습으로 영토 분쟁이나 역사 문제에서 편향된 시각 전달.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 글로벌 트렌드 -->
+                <div class="bg-[#151C2A] border border-[#232D3F] rounded-2xl p-5 space-y-3">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i class="fa-solid fa-globe text-blue-400"></i>
+                        <span>글로벌 AI 윤리 및 법적 규제 동향</span>
+                    </h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3.5 bg-[#1B2333] border border-blue-500/20 rounded-xl space-y-1">
+                            <strong class="text-blue-300 block">🇪🇺 EU AI 법안 (EU AI Act)</strong>
+                            <p class="text-slate-400 leading-relaxed">학습 데이터 상세 출처의 공개 의무화 및 고위험 AI에 대한 규제 법제화.</p>
+                        </div>
+                        <div class="p-3.5 bg-[#1B2333] border border-purple-500/20 rounded-xl space-y-1">
+                            <strong class="text-purple-300 block">🇺🇳 유네스코 & 학술 저널 규정</strong>
+                            <p class="text-slate-400 leading-relaxed">AI를 논문 저자로 인정하지 않으며, 인류 존엄성 기준 준수 촉구.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: 5 CORE PRINCIPLES & PLEDGE -->
+        <section id="sec-pledge" class="hidden space-y-6">
+            <div class="bg-gradient-to-br from-[#151C2A] to-[#1E2738] border border-blue-500/30 text-white rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-3">
+                <span class="inline-block bg-blue-500/10 text-blue-400 border border-blue-500/20 px-3 py-1 rounded-full text-xs font-bold">
+                    🛡️ 탐정단 주도권 선언
+                </span>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-white">
+                    생성형 AI 활용 5대 핵심 원칙 맹세
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+                    기술 오남용을 예방하고 혁신을 주도하는 올바른 AI 마스터가 되기 위한 서약입니다.
+                </p>
+            </div>
+
+            <!-- 5 Principles Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                <div class="bg-[#151C2A] p-5 rounded-2xl border border-[#232D3F] text-center space-y-2 glow-card">
+                    <div class="w-8 h-8 mx-auto rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs">
+                        1
+                    </div>
+                    <h4 class="font-bold text-white text-sm">주체성</h4>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">AI는 도구일 뿐! 의사결정의 주권은 나에게 있음.</p>
+                </div>
+
+                <div class="bg-[#151C2A] p-5 rounded-2xl border border-[#232D3F] text-center space-y-2 glow-card">
+                    <div class="w-8 h-8 mx-auto rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs">
+                        2
+                    </div>
+                    <h4 class="font-bold text-white text-sm">검증성</h4>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">산출물은 항상 의심하고 1차 자료로 교차 검증.</p>
+                </div>
+
+                <div class="bg-[#151C2A] p-5 rounded-2xl border border-[#232D3F] text-center space-y-2 glow-card">
+                    <div class="w-8 h-8 mx-auto rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs">
+                        3
+                    </div>
+                    <h4 class="font-bold text-white text-sm">투명성</h4>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">AI 사용 모델명 및 프롬프트 인용 사실 공개.</p>
+                </div>
+
+                <div class="bg-[#151C2A] p-5 rounded-2xl border border-[#232D3F] text-center space-y-2 glow-card">
+                    <div class="w-8 h-8 mx-auto rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs">
+                        4
+                    </div>
+                    <h4 class="font-bold text-white text-sm">보안성</h4>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">개인정보 및 기밀 데이터 입력 차단 수칙 준수.</p>
+                </div>
+
+                <div class="bg-[#151C2A] p-5 rounded-2xl border border-[#232D3F] text-center space-y-2 glow-card">
+                    <div class="w-8 h-8 mx-auto rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center font-bold text-xs">
+                        5
+                    </div>
+                    <h4 class="font-bold text-white text-sm">포용성</h4>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">편향성 및 혐오 표현을 걸러내는 윤리의식 유지.</p>
+                </div>
+            </div>
+
+            <!-- Pledge & Get Certificate -->
+            <div class="bg-[#151C2A] border border-[#232D3F] rounded-3xl p-6 sm:p-8 text-center space-y-4">
+                <h3 class="font-extrabold text-white text-xl">
+                    ✍️ 탐정단 서약서 서명 및 임명장 받기
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-400">
+                    위 5대 원칙을 지키고 올바르게 AI를 활용할 것을 약속합니다.
+                </p>
+                
+                <div class="max-w-sm mx-auto flex gap-2">
+                    <input id="detective-name-input" type="text" placeholder="탐정 이름 (예: 이동관)" class="flex-1 bg-[#1B2333] text-xs p-3 rounded-xl border border-[#232D3F] focus:border-blue-500 focus:outline-none text-white font-bold">
+                    <button onclick="issueCertificate()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-5 py-3 rounded-xl text-xs transition shadow-lg shadow-blue-600/25 whitespace-nowrap">
+                        임명장 발급
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- MODAL 1: Detective Certificate Badge Modal -->
+    <div id="badge-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#151C2A] rounded-3xl max-w-md w-full p-6 sm:p-8 border border-blue-500/40 shadow-2xl relative text-center space-y-4">
+            <button onclick="closeBadgeModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="w-16 h-16 bg-blue-500/10 text-blue-400 rounded-2xl mx-auto flex items-center justify-center text-3xl border border-blue-500/30">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+
+            <div>
+                <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest block">CERTIFICATE OF APPOINTMENT</span>
+                <h3 class="text-xl font-extrabold text-white mt-1">AI 마스터 탐정 임명장</h3>
+            </div>
+
+            <div class="bg-[#1B2333] p-4 rounded-2xl border border-[#232D3F] text-xs text-slate-300 space-y-2">
+                <p class="font-bold text-blue-300 text-sm" id="cert-name-display">탐정: (이름 미입력)</p>
+                <p class="leading-relaxed text-[11px] text-slate-400">
+                    위 사람은 생성형 AI의 주요 위험성(환각, 표절, 정보유출, 편향성)을 올바르게 이해하고, <strong>AI 팩트체크 탐정단 5대 핵심 원칙</strong>을 준수할 능력을 갖추었음을 증명합니다.
+                </p>
+            </div>
+
+            <div class="text-[10px] text-slate-500 font-mono">
+                발급일자: <span id="cert-date"></span> | AI 팩트체크 탐정단
+            </div>
+
+            <button onclick="closeBadgeModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition">
+                확인 및 닫기
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#151C2A] rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-blue-500/40 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeQuizModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-extrabold text-white">AI 팩트체크 탐정 자격 테스트</h3>
+                    <p class="text-xs text-slate-400">탐정 자격 취득을 위한 AI 윤리 & 팩트체크 퀴즈</p>
+                </div>
+            </div>
+
+            <div class="space-y-4 text-xs">
+                <!-- Question 1 -->
+                <div class="bg-[#1B2333] p-4 rounded-xl border border-[#232D3F] space-y-2">
+                    <p class="font-bold text-white">Q1. 생성형 AI가 거짓 정보를 그럴듯하게 완성하는 오류 현상은?</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="answerQuiz(1, true)" class="p-2.5 bg-[#151C2A] hover:bg-blue-600/30 border border-[#232D3F] rounded-xl text-left text-slate-300 hover:text-white transition">① 환각 (Hallucination)</button>
+                        <button onclick="answerQuiz(1, false)" class="p-2.5 bg-[#151C2A] hover:bg-blue-600/30 border border-[#232D3F] rounded-xl text-left text-slate-300 hover:text-white transition">② 과적합 (Overfitting)</button>
+                    </div>
+                </div>
+
+                <!-- Question 2 -->
+                <div class="bg-[#1B2333] p-4 rounded-xl border border-[#232D3F] space-y-2">
+                    <p class="font-bold text-white">Q2. AI가 작성한 초안을 사용할 때 올바른 태도는?</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="answerQuiz(2, false)" class="p-2.5 bg-[#151C2A] hover:bg-blue-600/30 border border-[#232D3F] rounded-xl text-left text-slate-300 hover:text-white transition">① 그대로 복사하여 제출</button>
+                        <button onclick="answerQuiz(2, true)" class="p-2.5 bg-[#151C2A] hover:bg-blue-600/30 border border-[#232D3F] rounded-xl text-left text-slate-300 hover:text-white transition">② 교차검증 후 직접 새로쓰기</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quiz-msg" class="text-xs font-bold text-center min-h-[20px]"></div>
+
+            <button onclick="closeQuizModal()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2.5 rounded-xl text-xs transition">
+                확인 및 닫기
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Infographic Modal -->
+    <div id="infographic-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#151C2A] rounded-3xl max-w-3xl w-full p-6 sm:p-8 border border-purple-500/40 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeInfographicModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg z-10">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-extrabold text-white">생성형 AI 윤리 & 팩트체크 인포그래픽</h3>
+                    <p class="text-xs text-slate-400">한눈에 보는 AI 탐정단 4대 위험 요소 & 5대 활용 원칙</p>
+                </div>
+            </div>
+
+            <!-- Infographic Image Display -->
+            <div class="bg-[#0B0F19] p-2 rounded-2xl border border-[#232D3F] flex justify-center">
+                <img src="infographics.png" alt="AI 윤리 인포그래픽" class="max-w-full h-auto rounded-xl object-contain max-h-[65vh]" onerror="this.onerror=null; this.src='https://placehold.co/800x600/151C2A/A855F7?text=infographics.png+Not+Found';">
+            </div>
+
+            <button onclick="closeInfographicModal()" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-2.5 rounded-xl text-xs transition">
+                확인 및 닫기
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 4: Video Modal -->
+    <div id="video-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#151C2A] rounded-3xl max-w-3xl w-full p-6 sm:p-8 border border-emerald-500/40 shadow-2xl relative space-y-5 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg z-10">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-circle-play"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-extrabold text-white">AI 탐정단 가이드 영상</h3>
+                    <p class="text-xs text-slate-400">생성형 AI 탐구 및 팩트체크 수사 가이드 동영상</p>
+                </div>
+            </div>
+
+            <!-- Video Player -->
+            <div class="bg-[#0B0F19] rounded-2xl overflow-hidden border border-[#232D3F]">
+                <video id="guide-video" controls class="w-full max-h-[60vh] rounded-xl">
+                    <source src="guide.mp4" type="video/mp4">
+                    브라우저가 비디오 태그를 지원하지 않거나 guide.mp4 파일을 찾을 수 없습니다.
+                </video>
+            </div>
+
+            <button onclick="closeVideoModal()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl text-xs transition">
+                확인 및 닫기
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Section Switching Handler
+        function switchSection(secId) {
+            const sections = ['dashboard', 'case1', 'case2', 'case3', 'case4', 'pledge'];
+            sections.forEach(s => {
+                const secElem = document.getElementById(`sec-${s}`);
+                const tabElem = document.getElementById(`tab-${s}`);
+                if (secElem) {
+                    if (s === secId) {
+                        secElem.classList.remove('hidden');
+                    } else {
+                        secElem.classList.add('hidden');
+                    }
+                }
+                if (tabElem) {
+                    if (s === secId) {
+                        tabElem.classList.add('active', 'bg-blue-600', 'text-white');
+                        tabElem.classList.remove('text-slate-400');
+                    } else {
+                        tabElem.classList.remove('active', 'bg-blue-600', 'text-white');
+                        tabElem.classList.add('text-slate-400');
+                    }
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Accordion Toggle Logic (Case 1)
+        function toggleStep(stepNum) {
+            const content = document.getElementById(`step-content-${stepNum}`);
+            const icon = document.getElementById(`step-icon-${stepNum}`);
+            if (content) {
+                const isHidden = content.classList.contains('hidden');
+                if (isHidden) {
+                    content.classList.remove('hidden');
+                    if (icon) icon.className = "fa-solid fa-chevron-up text-blue-400 text-xs";
+                } else {
+                    content.classList.add('hidden');
+                    if (icon) icon.className = "fa-solid fa-chevron-down text-slate-500 text-xs";
+                }
+            }
+        }
+
+        // Fact Check Mini Quiz (Case 1)
+        function checkFactQuiz(ansNum) {
+            const resultBox = document.getElementById('fact-quiz-result');
+            if (!resultBox) return;
+            resultBox.classList.remove('hidden');
+            if (ansNum === 2) {
+                resultBox.className = "mt-4 p-3.5 rounded-xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-xs font-bold";
+                resultBox.innerHTML = "🎉 정답입니다! '세종대왕 맥북 투척 사건'은 생성형 AI의 대표적인 환각(Hallucination) 사례입니다.";
+            } else {
+                resultBox.className = "mt-4 p-3.5 rounded-xl bg-rose-950/80 border border-rose-500/40 text-rose-300 text-xs font-bold";
+                resultBox.innerHTML = "❌ 틀렸습니다. 보기 B는 대표적인 AI 거짓(환각) 정보입니다. 다시 도전해보세요!";
+            }
+        }
+
+        // Citation Generator (Case 2)
+        function generateCitation() {
+            const ai = document.getElementById('cite-ai').value;
+            const prompt = document.getElementById('cite-prompt').value.trim();
+            const source = document.getElementById('cite-source').value.trim();
+            const box = document.getElementById('cite-output-box');
+            const textElem = document.getElementById('cite-output-text');
+
+            const promptStr = prompt ? `"${prompt}" 프롬프트 질의 응답.` : '"관련 질의" 응답.';
+            const sourceStr = source ? ` (1차 교차 검증 자료: ${source})` : '';
+            const citationResult = `[AI 활용 출처 표기] ${ai}, ${promptStr} 검색일자: ${new Date().toLocaleDateString('ko-KR')}.${sourceStr}`;
+
+            textElem.innerText = citationResult;
+            box.classList.remove('hidden');
+        }
+
+        function copyCitation() {
+            const textElem = document.getElementById('cite-output-text');
+            if (!textElem) return;
+            const textarea = document.createElement('textarea');
+            textarea.value = textElem.innerText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('출처 표기 문구가 클립보드에 복사되었습니다.');
+        }
+
+        // Security Checklist Score (Case 3)
+        function updateSecurityScore() {
+            const checkboxes = document.querySelectorAll('.sec-check');
+            let count = 0;
+            checkboxes.forEach(cb => { if (cb.checked) count++; });
+            const scoreLabel = document.getElementById('security-score');
+            if (scoreLabel) {
+                scoreLabel.innerText = `안전도 Score: ${count} / 5`;
+            }
+        }
+
+        // Sensitive Data Scanner (Case 3)
+        function scanSensitiveData() {
+            const input = document.getElementById('sec-input').value;
+            const res = document.getElementById('sec-result');
+            res.classList.remove('hidden');
+
+            const sensitiveKeywords = ['비밀번호', '계좌', '주민번호', '전화번호', '1234', 'password', '주소'];
+            let found = sensitiveKeywords.filter(kw => input.includes(kw));
+
+            if (found.length > 0) {
+                res.className = "p-3.5 rounded-xl bg-rose-950/80 text-rose-300 text-xs font-bold border border-rose-500/40";
+                res.innerHTML = `⚠️ 경고: 민감 키워드 [${found.join(', ')}] 가 감지되었습니다! 제정의 후 질문하세요.`;
+            } else if (input.trim() === '') {
+                res.className = "p-3.5 rounded-xl bg-[#1B2333] text-slate-300 text-xs font-bold border border-[#232D3F]";
+                res.innerHTML = "텍스트를 입력해 주세요.";
+            } else {
+                res.className = "p-3.5 rounded-xl bg-emerald-950/80 text-emerald-300 text-xs font-bold border border-emerald-500/40";
+                res.innerHTML = "✅ 안전함: 프롬프트에서 민감한 인적 키워드가 감지되지 않았습니다.";
+            }
+        }
+
+        // Modals Control
+        function openBadgeModal() {
+            document.getElementById('cert-date').innerText = new Date().toLocaleDateString('ko-KR');
+            document.getElementById('badge-modal').classList.remove('hidden');
+        }
+        function closeBadgeModal() {
+            document.getElementById('badge-modal').classList.add('hidden');
+        }
+        function openQuizModal() {
+            document.getElementById('quiz-modal').classList.remove('hidden');
+        }
+        function closeQuizModal() {
+            document.getElementById('quiz-modal').classList.add('hidden');
+        }
+
+        function issueCertificate() {
+            const name = document.getElementById('detective-name-input').value.trim();
+            if (!name) {
+                const msg = document.createElement('div');
+                msg.className = "fixed top-5 left-1/2 -translate-x-1/2 bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-bold z-50 shadow-xl";
+                msg.innerText = "탐정 이름을 입력해 주세요!";
+                document.body.appendChild(msg);
+                setTimeout(() => msg.remove(), 2000);
+                return;
+            }
+            document.getElementById('cert-name-display').innerText = `탐정: ${name}`;
+            openBadgeModal();
+        }
+
+        // Presentation Download Handler (presentation.pdf)
+        function downloadPresentation() {
+            const link = document.createElement('a');
+            link.href = 'presentation.pdf';
+            link.download = 'presentation.pdf';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function openInfographicModal() {
+            document.getElementById('infographic-modal').classList.remove('hidden');
+        }
+        function closeInfographicModal() {
+            document.getElementById('infographic-modal').classList.add('hidden');
+        }
+        function openVideoModal() {
+            document.getElementById('video-modal').classList.remove('hidden');
+        }
+        function closeVideoModal() {
+            const video = document.getElementById('guide-video');
+            if (video) video.pause();
+            document.getElementById('video-modal').classList.add('hidden');
+        }
+
+        function answerQuiz(qNum, isCorrect) {
+            const msgBox = document.getElementById('quiz-msg');
+            if (isCorrect) {
+                msgBox.className = "text-xs font-bold text-center py-1 text-emerald-400";
+                msgBox.innerText = "🎉 정답입니다! 올바른 팩트체크 태도를 갖추셨습니다.";
+            } else {
+                msgBox.className = "text-xs font-bold text-center py-1 text-rose-400";
+                msgBox.innerText = "❌ 오답입니다. 관련 위험 수칙을 다시 확인해 보세요.";
+            }
+        }
+    </script>
+</body>
+</html>
