@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡️집에 가고 싶어 미치겠다⚡️</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            cursor: pointer; /* 화면 전체가 클릭 가능해 보임 */
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background-color 0.05s ease;
+            position: relative;
+        }
+
+        /* 배경 노이즈 효과 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: -100%; left: -100%; right: -100%; bottom: -100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48ZyBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTAgMGg0MHY0MEgwVjB6bTIwIDIwaDIwdjIwSDIWMjB6TTAgMjBoMjB2MjBIMFYyMHoyMCAwaDIwdjIwSDIwVjB6Ii8+PC9nPjwvZz48L3N2Zz4=');
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body.insane::before {
+            opacity: 1;
+            animation: noise 0.2s infinite;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #ccc;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        /* 메인 버튼: 더 거대하고 공격적으로 */
+        .home-btn {
+            background: #ff0000;
+            color: black;
+            border: 10px solid black;
+            padding: 40px 80px;
+            font-size: 4rem;
+            font-weight: 900;
+            border-radius: 0; /* 각진 스타일 */
+            cursor: pointer;
+            box-shadow: 10px 10px 0 #fff, 20px 20px 0 #000;
+            transition: all 0.05s;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .home-btn:active {
+            transform: translate(5px, 5px);
+            box-shadow: 5px 5px 0 #fff, 10px 10px 0 #000;
+        }
+
+        /* 미쳐가는 단계별 버튼 스타일 */
+        .home-btn.lv1 { font-size: 5rem; padding: 50px 100px; background: #ff4400; color: white;}
+        .home-btn.lv2 { font-size: 6rem; padding: 60px 120px; background: #ff8800; border-color: white; animation: glitch 0.3s infinite;}
+        .home-btn.lv3 { font-size: 8rem; padding: 80px 160px; background: white; color: black; border-color: red; animation: glitch 0.1s infinite, shake 0.05s infinite; }
+
+        .counter {
+            margin-top: 30px;
+            font-size: 2rem;
+            color: #555;
+        }
+
+        .count-number {
+            color: #ff0000;
+            font-weight: bold;
+            font-size: 3rem;
+            text-shadow: 0 0 20px red;
+        }
+
+        /* 격렬한 떠다니는 텍스트 */
+        .floating-text {
+            position: absolute;
+            font-weight: 900;
+            pointer-events: none;
+            animation: explosion 1s ease-out forwards;
+            white-space: nowrap;
+            text-transform: uppercase;
+            z-index: 5;
+        }
+
+        /* ------------------ 애니메이션 및 효과 ------------------ */
+
+        /* 텍스트 사방으로 폭발 */
+        @keyframes explosion {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(var(--scale)) rotate(var(--rot)); }
+        }
+
+        /* 격렬한 지진 */
+        .shake-hard { animation: shakeHard 0.05s infinite !important; }
+        @keyframes shakeHard {
+            0% { transform: translate(5px, 5px) rotate(0deg); }
+            25% { transform: translate(-5px, -5px) rotate(1deg); }
+            50% { transform: translate(5px, -5px) rotate(-1deg); }
+            75% { transform: translate(-5px, 5px) rotate(0deg); }
+            100% { transform: translate(5px, 5px) rotate(1deg); }
+        }
+
+        /* 글리치 효과 */
+        @keyframes glitch {
+            0% { clip-path: inset(10% 0 30% 0); transform: translate(-5px, 0); }
+            20% { clip-path: inset(30% 0 10% 0); transform: translate(5px, 0); }
+            40% { clip-path: inset(50% 0 15% 0); transform: translate(-3px, -2px); }
+            60% { clip-path: inset(15% 0 50% 0); transform: translate(3px, 2px); }
+            80% { clip-path: inset(80% 0 5% 0); transform: translate(-1px, -1px); }
+            100% { clip-path: inset(5% 0 80% 0); transform: translate(1px, 1px); }
+        }
+
+        /* 노이즈 애니메이션 */
+        @keyframes noise {
+            0% { transform: translate(0, 0); }
+            10% { transform: translate(-5%, -5%); }
+            20% { transform: translate(-10%, 5%); }
+            30% { transform: translate(5%, -10%); }
+            40% { transform: translate(-5%, 15%); }
+            50% { transform: translate(-10%, -5%); }
+            60% { transform: translate(15%, 0); }
+            70% { transform: translate(0, 10%); }
+            80% { transform: translate(-15%, 0); }
+            90% { transform: translate(10%, 5%); }
+            100% { transform: translate(5%, 0); }
+        }
+
+        /* 시각 테러용 번쩍임 */
+        .flash { animation: flashBg 0.1s; }
+        @keyframes flashBg {
+            0% { background-color: #fff; }
+            100% { background-color: #000; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainContainer">
+        <div class="subtitle" id="subTitle">퇴근/하교 버튼</div>
+        <button class="home-btn" id="goHomeBtn">집!!!!!!</button>
+        <div class="counter">
+            <span class="count-number" id="count">0</span>
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('goHomeBtn');
+        const countDisplay = document.getElementById('count');
+        const container = document.getElementById('mainContainer');
+        const body = document.body;
+        const subTitle = document.getElementById('subTitle');
+        let count = 0;
+
+        const messages = [
+            "집!!!", "HOME!!!", "가고싶다!", "퇴근!!!", "이불!!!", "침대!!!", "제발!",
+            "왜아직여기", "탈출!!!", "ESCAPE", "GO HOME", "NOW!!!", "미치겠다",
+            "집집집", "집에갈래", "보내줘", "엄마!!!", "RUN!!!", "칼퇴!!!", "🤬"
+        ];
+
+        btn.addEventListener('click', (e) => {
+            count++;
+            countDisplay.textContent = count;
+
+            // 1. 텍스트 폭발 (화면 전체에 생성)
+            for(let i=0; i<3; i++) { // 클릭당 3개씩 생성
+                createFloatingText(e.clientX, e.clientY);
+            }
+
+            // 2. 누를수록 점진적 흑화
+            if (count > 10) {
+                body.style.backgroundColor = `hsl(0, ${Math.min(count*2, 100)}%, 5%)`;
+                body.classList.add('insane'); // 노이즈 효과 가동
+                subTitle.textContent = "아직도 안갔어?";
+            }
+
+            // 3. 버튼 진화 및 연출 격렬화
+            if (count >= 20 && count < 40) {
+                btn.classList.add('lv1');
+                btn.textContent = "집에 가!!!";
+                body.classList.add('shake-hard'); // 약한 지진
+            } else if (count >= 40 && count < 60) {
+                btn.classList.remove('lv1');
+                btn.classList.add('lv2');
+                btn.textContent = "SEND ME HOME";
+                subTitle.textContent = "광기 폭발";
+                flashScreen(); // 클릭 시 번쩍임
+            } else if (count >= 60) {
+                btn.classList.remove('lv2');
+                btn.classList.add('lv3');
+                btn.textContent = "🤬🤬🤬";
+                subTitle.textContent = "존재 자체가 귀가 희망";
+                flashScreen();
+                createMegaText(); // 추가 거대 텍스트 생성
+            }
+        });
+
+        // 텍스트 사방 폭발 함수
+        function createFloatingText(x, y) {
+            const text = document.createElement('div');
+            text.classList.add('floating-text');
+            
+            const randomMsg = messages[Math.floor(Math.random() * messages.length)];
+            
+            // 미쳐갈수록 텍스트도 크고 붉게
+            const baseSize = count >= 50 ? 50 : 20;
+            const randomSize = Math.floor(Math.random() * (baseSize*2)) + baseSize; 
+
+            // 폭발 방향 설정 (CSS 변수)
+            const tx = (Math.random() - 0.5) * window.innerWidth * 1.5 + 'px';
+            const ty = (Math.random() - 0.5) * window.innerHeight * 1.5 + 'px';
+            const scale = Math.random() * 3 + 1;
+            const rot = (Math.random() - 0.5) * 1080 + 'deg';
+
+            text.textContent = randomMsg;
+            text.style.left = `${x}px`;
+            text.style.top = `${y}px`;
+            text.style.fontSize = `${randomSize}px`;
+            
+            // 색상 변화
+            if (count < 20) text.style.color = '#fff';
+            else if (count < 40) text.style.color = '#ff4400';
+            else if (count < 60) text.style.color = '#ff0000';
+            else text.style.color = Math.random() > 0.5 ? '#fff' : '#ff0000'; // 깜빡임 효과
+
+            text.style.setProperty('--tx', tx);
+            text.style.setProperty('--ty', ty);
+            text.style.setProperty('--scale', scale);
+            text.style.setProperty('--rot', rot);
+
+            document.body.appendChild(text);
+
+            setTimeout(() => { text.remove(); }, 1000);
+        }
+
+        // 극도로 미쳤을 때 배경 번쩍임
+        function flashScreen() {
+            body.classList.add('flash');
+            setTimeout(() => body.classList.remove('flash'), 100);
+        }
+
+        // 60번 이상 클릭 시 거대 텍스트 추가 생성
+        function createMegaText() {
+            const mega = document.createElement('div');
+            mega.classList.add('floating-text');
+            mega.style.fontSize = '20rem';
+            mega.style.color = 'rgba(255,0,0,0.5)';
+            mega.style.left = '50%';
+            mega.style.top = '50%';
+            mega.style.zIndex = '1';
+            mega.textContent = "집";
+            
+            mega.style.setProperty('--tx', '0px');
+            mega.style.setProperty('--ty', '-1000px');
+            mega.style.setProperty('--scale', '5');
+            mega.style.setProperty('--rot', '0deg');
+            
+            document.body.appendChild(mega);
+            setTimeout(() => mega.remove(), 1000);
+        }
+
+    </script>
+</body>
+</html>
