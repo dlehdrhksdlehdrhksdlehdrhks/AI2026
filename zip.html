@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>집 가고 싶다</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gothic+A1:wght@400;500;700;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-app-compat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/12.15.0/firebase-firestore-compat.min.js"></script>
+<style>
+  :root{
+    --cold-bg-1: #0a1120;
+    --cold-bg-2: #131f33;
+    --office-cyan: #6fd8ff;
+    --home-orange: #ff7a3d;
+    --home-orange-deep: #ff3d1a;
+    --ink: #f4f1ea;
+    --alarm: #ff4f5e;
+    --panel: rgba(10, 17, 32, 0.72);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: var(--cold-bg-1);
+    font-family: "Gothic A1", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+    color: var(--ink);
+  }
+
+  #stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 30%, var(--cold-bg-2) 0%, var(--cold-bg-1) 70%);
+    transition: background 0.6s ease;
+  }
+
+  /* ---------- Office window grid (signature element) ---------- */
+  #lightsGrid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 2vmin;
+    padding: 4vmin;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .light {
+    background: var(--office-cyan);
+    opacity: 0.16;
+    border-radius: 3px;
+    box-shadow: 0 0 12px rgba(111,216,255,0.25);
+    transition: opacity 0.35s ease, background 0.6s ease, box-shadow 0.6s ease;
+  }
+  .light.off { background: var(--home-orange); opacity: 0.05; box-shadow: none; }
+  .light.flash { background: var(--home-orange); opacity: 0.9 !important; box-shadow: 0 0 30px 8px rgba(255,122,61,0.7); }
+
+  /* ---------- Foreground content ---------- */
+  #content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 20px;
+    max-width: 720px;
+  }
+
+  #eyebrow {
+    font-family: "JetBrains Mono", monospace;
+    font-weight: 500;
+    font-size: clamp(11px, 1.6vw, 14px);
+    letter-spacing: 0.35em;
+    color: var(--office-cyan);
+    opacity: 0.75;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    transition: color 0.6s ease;
+  }
+
+  #headline {
+    font-family: "Black Han Sans", "Gothic A1", sans-serif;
+    font-weight: 400;
+    font-size: clamp(40px, 9vw, 96px);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px 0;
+    text-shadow: 0 0 30px rgba(255,122,61,0.25);
+    transition: text-shadow 0.4s ease;
+  }
+
+  #subtext {
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 500;
+    font-size: clamp(14px, 2.2vw, 18px);
+    color: rgba(244,241,234,0.65);
+    margin-bottom: 40px;
+    min-height: 24px;
+    transition: color 0.4s ease;
+  }
+
+  /* ---------- Central door button ---------- */
+  #desireBtn {
+    position: relative;
+    width: clamp(150px, 24vw, 220px);
+    height: clamp(150px, 24vw, 220px);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    background: radial-gradient(circle at 35% 30%, #ffffff22, transparent 60%), linear-gradient(160deg, var(--office-cyan), #2b6f8f);
+    box-shadow: 0 0 0 6px rgba(111,216,255,0.12), 0 20px 60px -10px rgba(111,216,255,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.6s ease, box-shadow 0.6s ease, transform 0.08s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #desireBtn:active { transform: scale(0.94); }
+  #desireBtn svg { width: 46%; height: 46%; }
+  #desireBtn .doorIcon { fill: none; stroke: var(--ink); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+  #desireLabel {
+    margin-top: 22px;
+    font-family: "Gothic A1", sans-serif;
+    font-size: clamp(13px, 2vw, 16px);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: rgba(244,241,234,0.85);
+  }
+
+  /* ---------- Counter panel ---------- */
+  #counterPanel {
+    position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    background: var(--panel);
+    border: 1px solid rgba(111,216,255,0.25);
+    border-radius: 12px;
+    padding: 10px 22px;
+    display: flex;
+    gap: 26px;
+    align-items: center;
+    backdrop-filter: blur(6px);
+  }
+  .counterBlock { text-align: center; }
+  .counterLabel {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(244,241,234,0.5);
+    margin-bottom: 2px;
+  }
+  .counterValue {
+    font-family: "JetBrains Mono", monospace;
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(18px, 3vw, 26px);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--home-orange);
+    text-shadow: 0 0 14px rgba(255,122,61,0.55);
+  }
+  #syncWarning {
+    position: fixed;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: "Gothic A1", sans-serif;
+    font-size: 11px;
+    color: rgba(255,79,94,0.85);
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    text-align: center;
+    max-width: 90vw;
+  }
+
+  /* ---------- Floating burst phrases ---------- */
+  #burstLayer { position: fixed; inset: 0; pointer-events: none; z-index: 4; overflow: hidden; }
+  .burst {
+    position: absolute;
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 800;
+    color: var(--home-orange);
+    white-space: nowrap;
+    text-shadow: 0 0 12px rgba(255,122,61,0.6);
+    animation: floatUp 1.4s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0%   { transform: translate(-50%, 0) scale(0.8) rotate(var(--r,0deg)); opacity: 0; }
+    15%  { opacity: 1; transform: translate(-50%, -10px) scale(1.05) rotate(var(--r,0deg)); }
+    100% { transform: translate(-50%, -160px) scale(1) rotate(var(--r,0deg)); opacity: 0; }
+  }
+  .emoji-rain {
+    position: absolute;
+    top: -40px;
+    font-size: 26px;
+    animation: fall linear forwards;
+  }
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0.2; }
+  }
+
+  /* ---------- Milestone toast ---------- */
+  #milestoneToast {
+    position: fixed;
+    top: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
+    z-index: 6;
+    background: linear-gradient(120deg, var(--home-orange), var(--home-orange-deep));
+    color: #1a0a03;
+    font-family: "Gothic A1", sans-serif;
+    font-weight: 800;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-size: clamp(13px, 2vw, 16px);
+    box-shadow: 0 10px 30px rgba(255,61,26,0.4);
+    opacity: 0;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    white-space: nowrap;
+  }
+  #milestoneToast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Ultra overlay (500 / 1000 / 1500...) ---------- */
+  #ultraOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    opacity: 0;
+  }
+  #ultraOverlay .ultraText {
+    font-family: "Black Han Sans", sans-serif;
+    font-size: clamp(48px, 12vw, 140px);
+    color: var(--ink);
+    text-align: center;
+    text-shadow: 0 0 40px rgba(255,122,61,0.9), 0 0 90px rgba(255,61,26,0.7);
+    transform: scale(0.6);
+  }
+  #ultraOverlay.show {
+    animation: ultraPop 1.5s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  #ultraOverlay.show .ultraText { animation: ultraTextPop 1.5s cubic-bezier(.2,.8,.3,1) forwards; }
+  @keyframes ultraPop {
+    0% { opacity: 0; }
+    15% { opacity: 1; }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes ultraTextPop {
+    0% { transform: scale(0.4) rotate(-4deg); }
+    20% { transform: scale(1.15) rotate(2deg); }
+    35% { transform: scale(1) rotate(0deg); }
+    85% { transform: scale(1) rotate(0deg); }
+    100% { transform: scale(1.3) rotate(0deg); }
+  }
+
+  /* ---------- Screen shake tiers ---------- */
+  @keyframes shakeSmall { 0%,100%{transform:translate(0,0) rotate(0);} 10%{transform:translate(-22px,15px) rotate(-3.2deg);} 20%{transform:translate(25px,-18px) rotate(3.5deg);} 30%{transform:translate(-26px,16px) rotate(-3.2deg);} 40%{transform:translate(22px,-14px) rotate(2.9deg);} 50%{transform:translate(-19px,13px) rotate(-2.6deg);} 60%{transform:translate(17px,-11px) rotate(2.2deg);} 70%{transform:translate(-13px,8px) rotate(-1.6deg);} 80%{transform:translate(9px,-6px) rotate(1.1deg);} 90%{transform:translate(-5px,3px) rotate(-0.5deg);} }
+  @keyframes shakeMed   { 0%,100%{transform:translate(0,0) rotate(0);} 8%{transform:translate(-40px,28px) rotate(-5.4deg);} 16%{transform:translate(44px,-32px) rotate(5.8deg);} 24%{transform:translate(-46px,30px) rotate(-5.6deg);} 32%{transform:translate(41px,-26px) rotate(5deg);} 40%{transform:translate(-37px,24px) rotate(-4.5deg);} 48%{transform:translate(34px,-22px) rotate(4deg);} 56%{transform:translate(-30px,19px) rotate(-3.4deg);} 64%{transform:translate(26px,-16px) rotate(2.9deg);} 72%{transform:translate(-21px,13px) rotate(-2.2deg);} 80%{transform:translate(17px,-10px) rotate(1.6deg);} 88%{transform:translate(-9px,5px) rotate(-0.8deg);} }
+  @keyframes shakeBig   { 0%,100%{transform:translate(0,0) rotate(0);} 7%{transform:translate(-58px,40px) rotate(-7.4deg);} 14%{transform:translate(63px,-46px) rotate(8deg);} 21%{transform:translate(-65px,43px) rotate(-7.7deg);} 28%{transform:translate(60px,-38px) rotate(7deg);} 35%{transform:translate(-55px,35px) rotate(-6.4deg);} 42%{transform:translate(50px,-30px) rotate(5.8deg);} 49%{transform:translate(-44px,27px) rotate(-5deg);} 56%{transform:translate(39px,-23px) rotate(4.4deg);} 63%{transform:translate(-33px,20px) rotate(-3.7deg);} 70%{transform:translate(27px,-15px) rotate(2.9deg);} 77%{transform:translate(-20px,11px) rotate(-2deg);} 84%{transform:translate(13px,-7px) rotate(1.2deg);} 91%{transform:translate(-6px,3px) rotate(-0.6deg);} }
+  @keyframes shakeMega  { 0%,100%{transform:translate(0,0) rotate(0);} 6%{transform:translate(-78px,54px) rotate(-9.6deg);} 12%{transform:translate(84px,-60px) rotate(10.5deg);} 18%{transform:translate(-87px,57px) rotate(-10.2deg);} 24%{transform:translate(81px,-51px) rotate(9.3deg);} 30%{transform:translate(-75px,48px) rotate(-8.7deg);} 36%{transform:translate(69px,-42px) rotate(7.8deg);} 42%{transform:translate(-62px,37px) rotate(-6.9deg);} 48%{transform:translate(56px,-33px) rotate(6deg);} 54%{transform:translate(-48px,29px) rotate(-5.1deg);} 60%{transform:translate(42px,-24px) rotate(4.4deg);} 66%{transform:translate(-35px,20px) rotate(-3.5deg);} 72%{transform:translate(29px,-16px) rotate(2.7deg);} 78%{transform:translate(-21px,12px) rotate(-2deg);} 84%{transform:translate(15px,-8px) rotate(1.2deg);} 90%{transform:translate(-9px,4px) rotate(-0.6deg);} 96%{transform:translate(4px,-2px) rotate(0.3deg);} }
+  @keyframes shakeUltra { 0%,100%{transform:translate(0,0) rotate(0) scale(1);} 5%{transform:translate(-108px,75px) rotate(-12deg) scale(1.06);} 10%{transform:translate(117px,-84px) rotate(13.5deg) scale(0.94);} 15%{transform:translate(-120px,81px) rotate(-12.9deg) scale(1.07);} 20%{transform:translate(114px,-72px) rotate(12.3deg) scale(0.93);} 25%{transform:translate(-105px,66px) rotate(-11.1deg) scale(1.05);} 30%{transform:translate(96px,-57px) rotate(9.9deg) scale(0.95);} 35%{transform:translate(-87px,51px) rotate(-8.7deg) scale(1.03);} 40%{transform:translate(78px,-45px) rotate(7.5deg) scale(0.97);} 45%{transform:translate(-68px,39px) rotate(-6.3deg) scale(1.02);} 50%{transform:translate(60px,-33px) rotate(5.4deg) scale(0.98);} 55%{transform:translate(-51px,29px) rotate(-4.4deg) scale(1);} 60%{transform:translate(44px,-23px) rotate(3.6deg) scale(1);} 65%{transform:translate(-35px,19px) rotate(-2.9deg) scale(1);} 70%{transform:translate(29px,-14px) rotate(2.3deg) scale(1);} 75%{transform:translate(-21px,11px) rotate(-1.7deg) scale(1);} 80%{transform:translate(17px,-8px) rotate(1.2deg) scale(1);} 85%{transform:translate(-11px,5px) rotate(-0.8deg) scale(1);} 90%{transform:translate(6px,-3px) rotate(0.5deg) scale(1);} 95%{transform:translate(-3px,1px) rotate(-0.2deg) scale(1);} }
+  @keyframes shakeClear { 0%,100%{transform:translate(0,0) rotate(0) scale(1);} 4%{transform:translate(-135px,96px) rotate(-13.5deg) scale(1.08);} 8%{transform:translate(144px,-105px) rotate(15deg) scale(0.92);} 12%{transform:translate(-150px,102px) rotate(-14.4deg) scale(1.09);} 16%{transform:translate(141px,-90px) rotate(13.5deg) scale(0.91);} 20%{transform:translate(-132px,84px) rotate(-12.3deg) scale(1.07);} 25%{transform:translate(120px,-75px) rotate(11.1deg) scale(0.94);} 30%{transform:translate(-108px,66px) rotate(-9.9deg) scale(1.05);} 35%{transform:translate(96px,-57px) rotate(8.7deg) scale(0.96);} 40%{transform:translate(-84px,48px) rotate(-7.5deg) scale(1.03);} 45%{transform:translate(72px,-40px) rotate(6.3deg) scale(0.98);} 50%{transform:translate(-61px,34px) rotate(-5.2deg) scale(1.02);} 55%{transform:translate(52px,-28px) rotate(4.3deg) scale(1);} 60%{transform:translate(-43px,24px) rotate(-3.4deg) scale(1);} 65%{transform:translate(36px,-19px) rotate(2.8deg) scale(1);} 70%{transform:translate(-28px,15px) rotate(-2.2deg) scale(1);} 75%{transform:translate(22px,-12px) rotate(1.6deg) scale(1);} 80%{transform:translate(-16px,9px) rotate(-1.2deg) scale(1);} 85%{transform:translate(12px,-6px) rotate(0.8deg) scale(1);} 90%{transform:translate(-7px,3px) rotate(-0.4deg) scale(1);} 95%{transform:translate(3px,-1px) rotate(0.2deg) scale(1);} }
+  #stage.shake-1 { animation: shakeSmall 0.5s ease; }
+  #stage.shake-2 { animation: shakeMed 0.65s ease; }
+  #stage.shake-3 { animation: shakeBig 0.85s ease; }
+  #stage.shake-4 { animation: shakeMega 1.1s ease; }
+  #stage.shake-5 { animation: shakeUltra 1.7s ease; }
+  #stage.shake-clear { animation: shakeClear 2.1s ease; }
+
+  #flashOverlay {
+    position: fixed;
+    inset: 0;
+    background: var(--home-orange);
+    opacity: 0;
+    z-index: 8;
+    pointer-events: none;
+  }
+  #flashOverlay.go { animation: flashPulse 0.5s ease; }
+  #flashOverlay.go-mega { animation: flashPulseMega 0.9s ease; }
+  #flashOverlay.go-ultra { animation: flashPulseUltra 1.6s ease; }
+  @keyframes flashPulse { 0%{opacity:0;} 15%{opacity:0.7;} 55%{opacity:0.45;} 100%{opacity:0;} }
+  @keyframes flashPulseMega {
+    0%{opacity:0; background:var(--home-orange);}
+    12%{opacity:0.85; background:var(--alarm);}
+    40%{opacity:0.5; background:var(--home-orange);}
+    100%{opacity:0;}
+  }
+  @keyframes flashPulseUltra {
+    0%{opacity:0; background:#ffffff; filter:hue-rotate(0deg);}
+    10%{opacity:0.95; background:#ffffff;}
+    25%{opacity:0.7; background:var(--alarm); filter:hue-rotate(30deg);}
+    45%{opacity:0.55; background:var(--home-orange-deep); filter:hue-rotate(-20deg);}
+    70%{opacity:0.35; background:var(--home-orange);}
+    100%{opacity:0;}
+  }
+
+  /* ---------- Shockwave ring: plays as the flash disappears, gives clicks impact ---------- */
+  #shockwave {
+    position: fixed;
+    top: 50%; left: 50%;
+    width: 10px; height: 10px;
+    margin: -5px 0 0 -5px;
+    border-radius: 50%;
+    border: 6px solid var(--home-orange);
+    opacity: 0;
+    z-index: 7;
+    pointer-events: none;
+  }
+  #shockwave.go       { animation: shockwaveBurst 0.6s cubic-bezier(.15,.7,.3,1) forwards; }
+  #shockwave.go-mega  { animation: shockwaveBurst 0.85s cubic-bezier(.15,.7,.3,1) forwards; border-color: var(--alarm); border-width: 10px; }
+  #shockwave.go-ultra { animation: shockwaveBurst 1.2s cubic-bezier(.15,.7,.3,1) forwards; border-color: #fff5e6; border-width: 14px; }
+  @keyframes shockwaveBurst {
+    0%   { width: 10px; height: 10px; margin: -5px 0 0 -5px; opacity: 0.95; }
+    100% { width: 160vmax; height: 160vmax; margin: -80vmax 0 0 -80vmax; opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #stage.shake-1, #stage.shake-2, #stage.shake-3, #stage.shake-4, #stage.shake-5, #stage.shake-clear, #shakeWrapper.idle-on { animation: none; }
+    .burst, .emoji-rain, .ember { animation: none; opacity: 0; }
+    #fireLayer { animation: none; }
+    #ultraOverlay.show, #ultraOverlay.show .ultraText { animation: none; }
+  }
+
+  /* ---------- Continuous fire layer ---------- */
+  #fireLayer {
+    position: fixed;
+    left: 0; right: 0; bottom: -10vh;
+    height: 55vh;
+    z-index: 1;
+    pointer-events: none;
+    opacity: var(--fire-opacity, 0.25);
+    filter: blur(16px);
+    mix-blend-mode: screen;
+    background:
+      radial-gradient(60% 70% at 15% 100%, rgba(255,214,102,0.9), transparent 60%),
+      radial-gradient(50% 65% at 40% 100%, rgba(255,122,61,0.95), transparent 60%),
+      radial-gradient(55% 75% at 65% 100%, rgba(255,61,26,0.9), transparent 60%),
+      radial-gradient(50% 60% at 88% 100%, rgba(255,159,28,0.9), transparent 60%);
+    animation: fireFlicker 1.6s ease-in-out infinite alternate;
+    transition: opacity 0.8s ease;
+  }
+  @keyframes fireFlicker {
+    0%   { transform: scaleY(1) translateX(0); opacity: 0.85; }
+    20%  { transform: scaleY(1.06) translateX(-1.5%); opacity: 1; }
+    40%  { transform: scaleY(0.94) translateX(1.5%); opacity: 0.8; }
+    60%  { transform: scaleY(1.08) translateX(-1%); opacity: 0.95; }
+    80%  { transform: scaleY(0.97) translateX(1%); opacity: 0.85; }
+    100% { transform: scaleY(1.04) translateX(0); opacity: 1; }
+  }
+  .ember {
+    position: fixed;
+    bottom: -4vh;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff2c9, var(--home-orange) 55%, transparent 75%);
+    pointer-events: none;
+    z-index: 3;
+    animation: emberRise linear forwards;
+  }
+  @keyframes emberRise {
+    0%   { transform: translate(0,0) scale(1); opacity: 0.95; }
+    70%  { opacity: 0.8; }
+    100% { transform: translate(var(--dx,20px), -95vh) scale(0.3); opacity: 0; }
+  }
+
+  #shakeWrapper {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ---------- Constant diagonal jitter (always on, runs independently of click shakes) ---------- */
+  @keyframes idleJitter {
+    0%   { transform: translate(0,0) rotate(0); }
+    9%   { transform: translate(calc(var(--idle-amp,4px) * -1), calc(var(--idle-amp,4px) * 0.7)) rotate(calc(var(--idle-rot,0.3deg) * -1)); }
+    18%  { transform: translate(var(--idle-amp,4px), calc(var(--idle-amp,4px) * -0.8)) rotate(var(--idle-rot,0.3deg)); }
+    27%  { transform: translate(calc(var(--idle-amp,4px) * -0.9), calc(var(--idle-amp,4px) * -0.6)) rotate(calc(var(--idle-rot,0.3deg) * -0.8)); }
+    36%  { transform: translate(calc(var(--idle-amp,4px) * 0.8), var(--idle-amp,4px)) rotate(calc(var(--idle-rot,0.3deg) * 0.7)); }
+    45%  { transform: translate(calc(var(--idle-amp,4px) * -0.7), calc(var(--idle-amp,4px) * 0.5)) rotate(calc(var(--idle-rot,0.3deg) * -0.6)); }
+    54%  { transform: translate(calc(var(--idle-amp,4px) * 0.9), calc(var(--idle-amp,4px) * -0.9)) rotate(calc(var(--idle-rot,0.3deg) * 0.8)); }
+    63%  { transform: translate(calc(var(--idle-amp,4px) * -0.6), calc(var(--idle-amp,4px) * -0.4)) rotate(calc(var(--idle-rot,0.3deg) * -0.4)); }
+    72%  { transform: translate(calc(var(--idle-amp,4px) * 0.7), calc(var(--idle-amp,4px) * 0.6)) rotate(calc(var(--idle-rot,0.3deg) * 0.5)); }
+    81%  { transform: translate(calc(var(--idle-amp,4px) * -0.5), calc(var(--idle-amp,4px) * 0.3)) rotate(calc(var(--idle-rot,0.3deg) * -0.3)); }
+    90%  { transform: translate(calc(var(--idle-amp,4px) * 0.4), calc(var(--idle-amp,4px) * -0.3)) rotate(calc(var(--idle-rot,0.3deg) * 0.2)); }
+    100% { transform: translate(0,0) rotate(0); }
+  }
+  #shakeWrapper.idle-on { animation: idleJitter var(--idle-dur, 0.45s) linear infinite; }
+
+  @media (max-width: 480px) {
+    #counterPanel { gap: 16px; padding: 8px 14px; }
+  }
+
+@keyframes hitStop{0%{transform:scale(1)}30%{transform:scale(.82)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+#desireBtn.hit{animation:hitStop .35s cubic-bezier(.2,1.4,.3,1)}
+#flashOverlay.go{animation:flashPulse .15s ease, redBlast .45s ease .05s}
+@keyframes redBlast{0%{background:#fff;opacity:1}20%{background:#ff0000;opacity:1}100%{background:#ff0000;opacity:0}
+.bigScream{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;left:0;top:0;font-size:min(24vw,220px);font-weight:900;-webkit-text-stroke:4px #fff;text-shadow:0 0 20px #ff0,0 0 60px #f00,0 0 120px #f00;transform:rotate(calc((var(--r,0))*1deg));font-family:"Black Han Sans";color:rgba(255,255,255,.18);pointer-events:none;animation:boom .5s forwards;z-index:20}
+@keyframes boom{0%{transform:scale(.2)}40%{transform:scale(1.3)}100%{transform:scale(1);opacity:0}}
+</style>
+</head>
+<body>
+
+<div id="flashOverlay"></div>
+<div id="shockwave"></div>
+<div id="fireLayer"></div>
+<div id="ultraOverlay"><div class="ultraText" id="ultraText"></div></div>
+
+<div id="counterPanel">
+  <div class="counterBlock">
+    <div class="counterLabel">전 세계 누적 갈망</div>
+    <div class="counterValue" id="globalCount">불러오는 중…</div>
+  </div>
+</div>
+
+<div id="milestoneToast"></div>
+
+<div id="shakeWrapper">
+<div id="stage">
+  <div id="lightsGrid"></div>
+
+  <div id="content">
+    <div id="eyebrow">18:02 · 아직 퇴근 못 함</div>
+    <h1 id="headline">집... 가고... 싶다...</h1>
+    <p id="subtext">버튼을 누를 때마다, 사무실 불이 하나씩 꺼진다.</p>
+
+    <button id="desireBtn" aria-label="집 가고 싶다 클릭">
+      <svg viewBox="0 0 100 100">
+        <path class="doorIcon" d="M20 90 V25 L50 10 L80 25 V90" />
+        <path class="doorIcon" d="M20 90 H80" />
+        <path class="doorIcon" d="M43 90 V60 H57 V90" />
+      </svg>
+    </button>
+    <div id="desireLabel">집 가고 싶다</div>
+  </div>
+</div>
+</div>
+
+<div id="burstLayer"></div>
+<div id="syncWarning"></div>
+
+<script>
+  // ---------------- Firebase ----------------
+  const firebaseConfig = {
+    apiKey: "AIzaSyC2MWnZC2BoNpnfUCfy8LOT9fEGBOFcYFY",
+    authDomain: "jipgagosipda-12b9d.firebaseapp.com",
+    projectId: "jipgagosipda-12b9d",
+    storageBucket: "jipgagosipda-12b9d.firebasestorage.app",
+    messagingSenderId: "418490532933",
+    appId: "1:418490532933:web:a54bf37c7a49c0146b0f2c"
+  };
+
+  let db = null;
+  let firestoreReady = false;
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    firestoreReady = true;
+  } catch (e) {
+    console.error("Firebase init failed:", e);
+  }
+
+  const globalCounterRef = firestoreReady ? db.collection("desire_counter").doc("global") : null;
+  const globalCountEl = document.getElementById("globalCount");
+  const syncWarningEl = document.getElementById("syncWarning");
+  let warned = false;
+
+  function showSyncWarning() {
+    if (warned) return;
+    warned = true;
+    syncWarningEl.textContent = "⚠ 실시간 동기화 실패 — Firebase 콘솔에서 Firestore 데이터베이스 생성 및 보안 규칙(읽기/쓰기 허용)을 확인해주세요.";
+    syncWarningEl.style.opacity = "1";
+  }
+
+  if (firestoreReady) {
+    globalCounterRef.onSnapshot(
+      (doc) => {
+        const count = doc.exists && doc.data().count ? doc.data().count : 0;
+        globalCountEl.textContent = count.toLocaleString("ko-KR");
+      },
+      (err) => {
+        console.error("onSnapshot error:", err);
+        globalCountEl.textContent = "---";
+        showSyncWarning();
+      }
+    );
+  } else {
+    globalCountEl.textContent = "---";
+    showSyncWarning();
+  }
+
+  function recordGlobalClick() {
+    if (!firestoreReady) return;
+    globalCounterRef
+      .set({ count: firebase.firestore.FieldValue.increment(1) }, { merge: true })
+      .catch((err) => {
+        console.error("write failed:", err);
+        showSyncWarning();
+      });
+  }
+
+  // ---------------- Lights grid (ambient) ----------------
+  const TOTAL_LIGHTS = 48;
+  const lightsGrid = document.getElementById("lightsGrid");
+  const lights = [];
+  for (let i = 0; i < TOTAL_LIGHTS; i++) {
+    const d = document.createElement("div");
+    d.className = "light";
+    lightsGrid.appendChild(d);
+    lights.push(d);
+  }
+
+  // ---------------- State ----------------
+  let personalCount = 0;
+  const headlineEl = document.getElementById("headline");
+  const subtextEl = document.getElementById("subtext");
+  const eyebrowEl = document.getElementById("eyebrow");
+  const stageEl = document.getElementById("stage");
+  const shakeWrapperEl = document.getElementById("shakeWrapper");
+  const burstLayer = document.getElementById("burstLayer");
+  const milestoneToast = document.getElementById("milestoneToast");
+  const flashOverlay = document.getElementById("flashOverlay");
+  const ultraOverlay = document.getElementById("ultraOverlay");
+  const ultraText = document.getElementById("ultraText");
+
+  const HEADLINES = [
+    { min: 0,   text: "집... 가고... 싶다...",  sub: "버튼을 누를 때마다, 사무실 불이 하나씩 꺼진다.", eyebrow: "18:02 · 아직 퇴근 못 함" },
+    { min: 10,  text: "진짜 집에 가고 싶다!!",  sub: "이 정도면 조퇴 사유 아닌가.", eyebrow: "19:14 · 퇴근 신청서 작성 중" },
+    { min: 30,  text: "제발 집에 보내줘!!!",   sub: "야근이 야근을 부른다.", eyebrow: "21:40 · 저녁을 굶은 지 오래" },
+    { min: 60,  text: "집!!! 집!!! 집!!!",     sub: "머릿속엔 오직 침대뿐.", eyebrow: "23:55 · 막차 놓칠 위기" },
+    { min: 100, text: "집집집집집집집집집!!",  sub: "이건 이제 갈망이 아니라 신앙이다.", eyebrow: "새벽 · 시간 개념 상실" },
+    { min: 200, text: "집이 나를 부른다",      sub: "전 세계가 나와 같은 마음이라는 증거, 위 숫자.", eyebrow: "∞ · 퇴근이라는 개념의 소멸" },
+  ];
+
+  const BURST_PHRASES = ["집!!", "가고싶다", "퇴근하고싶다", "지금 당장", "그만하고싶다", "침대가 그립다", "집이 최고야", "이불 속으로"];
+  const EMOJIS = ["🏠", "✨", "🔥", "💤", "🛏️"];
+
+  function updateHeadline() {
+    let tier = HEADLINES[0];
+    for (const h of HEADLINES) { if (personalCount >= h.min) tier = h; }
+    headlineEl.textContent = tier.text;
+    subtextEl.textContent = tier.sub;
+    eyebrowEl.textContent = tier.eyebrow;
+  }
+
+  function updateAmbience() {
+    const cycleProgress = (personalCount % TOTAL_LIGHTS) / TOTAL_LIGHTS;
+    const ultraLevel = Math.floor(personalCount / 500);
+    const intensity = Math.min(1, ultraLevel * 0.22 + cycleProgress * 0.3);
+    const lerp = (hexA, hexB, t) => {
+      const a = hexA.match(/\w\w/g).map(x => parseInt(x, 16));
+      const b = hexB.match(/\w\w/g).map(x => parseInt(x, 16));
+      const c = a.map((v, i) => Math.round(v + (b[i] - v) * t));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    };
+    const bg1 = lerp("#0a1120", "#3a1508", intensity);
+    const bg2 = lerp("#131f33", "#5c2308", intensity);
+    stageEl.style.background = `radial-gradient(ellipse at 50% 30%, ${bg2} 0%, ${bg1} 70%)`;
+
+    // fire grows continuously with total clicks (caps out so it never fully vanishes or explodes)
+    const fireOpacity = Math.min(0.85, 0.22 + personalCount * 0.006);
+    document.getElementById("fireLayer").style.setProperty("--fire-opacity", fireOpacity);
+
+    // baseline jitter stays minimal — barely noticeable at rest
+    const idleAmp = Math.min(3, 0.8 + personalCount * 0.006);
+    const idleRot = Math.min(0.6, 0.15 + personalCount * 0.0015);
+    const idleDur = Math.max(0.35, 0.55 - personalCount * 0.0004);
+    shakeWrapperEl.style.setProperty("--idle-amp", idleAmp + "px");
+    shakeWrapperEl.style.setProperty("--idle-rot", idleRot + "deg");
+    shakeWrapperEl.style.setProperty("--idle-dur", idleDur + "s");
+  }
+
+  function spawnEmber() {
+    const el = document.createElement("div");
+    el.className = "ember";
+    const size = 6 + Math.random() * 10;
+    el.style.width = size + "px";
+    el.style.height = size + "px";
+    el.style.left = Math.random() * 100 + "vw";
+    el.style.setProperty("--dx", (Math.random() * 80 - 40) + "px");
+    el.style.animationDuration = (3 + Math.random() * 2.5) + "s";
+    burstLayer.appendChild(el);
+    setTimeout(() => el.remove(), 6000);
+  }
+  // fire keeps burning continuously, faster as the longing builds
+  setInterval(() => {
+    const rate = Math.min(6, 1 + Math.floor(personalCount / 20));
+    for (let i = 0; i < rate; i++) setTimeout(spawnEmber, i * 90);
+  }, 700);
+
+  shakeWrapperEl.classList.add("idle-on");
+  updateAmbience();
+
+  function spawnBurst(sizeBoost) {
+    const el = document.createElement("div");
+    el.className = "burst";
+    el.textContent = BURST_PHRASES[Math.floor(Math.random() * BURST_PHRASES.length)];
+    const size = 14 + (sizeBoost || 0) + Math.random() * 6;
+    el.style.fontSize = size + "px";
+    const x = 50 + (Math.random() * 40 - 20);
+    const y = 62 + (Math.random() * 6 - 3);
+    el.style.left = x + "vw";
+    el.style.top = y + "vh";
+    el.style.setProperty("--r", (Math.random() * 16 - 8) + "deg");
+    burstLayer.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  }
+
+  function spawnEmojiRain(count) {
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const el = document.createElement("div");
+        el.className = "emoji-rain";
+        el.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+        el.style.left = Math.random() * 100 + "vw";
+        el.style.animationDuration = (2 + Math.random() * 1.5) + "s";
+        el.style.fontSize = (18 + Math.random() * 20) + "px";
+        burstLayer.appendChild(el);
+        setTimeout(() => el.remove(), 4000);
+      }, i * 40);
+    }
+  }
+
+  function shake(tierClass) {
+    stageEl.classList.remove("shake-1", "shake-2", "shake-3", "shake-4", "shake-5", "shake-clear");
+    void stageEl.offsetWidth;
+    stageEl.classList.add(tierClass);
+  }
+
+  let toastTimer = null;
+  function showMilestone(text) {
+    milestoneToast.textContent = text;
+    milestoneToast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => milestoneToast.classList.remove("show"), 2400);
+  }
+
+  function flash(cls) {
+    flashOverlay.classList.remove("go", "go-mega", "go-ultra");
+    void flashOverlay.offsetWidth;
+    flashOverlay.classList.add(cls);
+  }
+
+  function toggleLightsPulse() {
+    lights.forEach((l) => l.classList.add("flash"));
+    setTimeout(() => lights.forEach((l) => l.classList.remove("flash")), 350);
+  }
+
+  function ultraMoment(n) {
+    // n = how many times we've hit a multiple of 500 (1, 2, 3, ...)
+    ultraText.textContent = personalCount.toLocaleString("ko-KR") + "번째 갈망!!!";
+    ultraOverlay.classList.remove("show");
+    void ultraOverlay.offsetWidth;
+    ultraOverlay.classList.add("show");
+    flash("go-ultra");
+    shake("shake-5");
+    toggleLightsPulse();
+    spawnEmojiRain(Math.min(60, 20 + n * 8));
+    for (let i = 0; i < Math.min(30, 12 + n * 4); i++) {
+      setTimeout(() => spawnBurst(20 + n * 3), i * 25);
+    }
+    showMilestone("🏠 " + personalCount.toLocaleString("ko-KR") + "번째 갈망 — 이 세상 갈망이 아니다 🏠");
+  }
+
+  function megaMoment() {
+    flash("go-mega");
+    shake("shake-4");
+    toggleLightsPulse();
+    spawnEmojiRain(10);
+    for (let i = 0; i < 12; i++) setTimeout(() => spawnBurst(10), i * 30);
+    showMilestone("🔥 " + personalCount + "번째 갈망 — 엄청난 강도!! 🔥");
+  }
+
+  function bigMoment() {
+    flash("go");
+    shake("shake-3");
+    for (let i = 0; i < 6; i++) setTimeout(() => spawnBurst(6), i * 30);
+    showMilestone("✨ " + personalCount + "번째 갈망 — 더 강렬해진다 ✨");
+  }
+
+  function medMoment() {
+    flash("go");
+    shake("shake-2");
+    for (let i = 0; i < 3; i++) setTimeout(() => spawnBurst(2), i * 30);
+    showMilestone(personalCount + "번째 갈망 — 갈망이 차오른다");
+  }
+
+  function patternClearMoment() {
+    toggleLightsPulse();
+    flash("go-mega");
+    shake("shake-clear");
+    spawnEmojiRain(24);
+    for (let i = 0; i < 16; i++) setTimeout(() => spawnBurst(14), i * 25);
+    showMilestone("🏚️ 사무실이 완전히 어두워졌다 — 지금 당장 집에 가야 해!! 🏚️");
+    setTimeout(() => lights.forEach((l) => l.classList.remove("off")), 320);
+  }
+
+  function handleClick() {
+ document.getElementById("desireBtn").classList.remove("hit");void desireBtn.offsetWidth;desireBtn.classList.add("hit");const s=document.createElement("div");s.className="bigScream";s.textContent=["집!!!!!!!!","퇴근!!!!!!!!","침대!!!!!!!!","살려줘!!!!!!!!"][Math.floor(Math.random()*4)];document.body.appendChild(s);setTimeout(()=>s.remove(),500);
+    personalCount++;
+    recordGlobalClick();
+
+    const idx = (personalCount - 1) % TOTAL_LIGHTS;
+    lights[idx].classList.add("off");
+    const patternCleared = (personalCount % TOTAL_LIGHTS === 0);
+
+    updateHeadline();
+    updateAmbience();
+
+    // ---- escalating milestone tiers: pick the strongest that applies ----
+    if (personalCount % 500 === 0) {
+      ultraMoment(Math.floor(personalCount / 500));
+    } else if (personalCount % 100 === 0) {
+      megaMoment();
+    } else if (personalCount % 50 === 0) {
+      bigMoment();
+    } else if (personalCount % 10 === 0) {
+      medMoment();
+    } else {
+      shake("shake-1");
+      spawnBurst(0);
+    }
+
+    // the pattern going fully dark is always the biggest shake — it overrides whatever tier just fired
+    if (patternCleared) {
+      patternClearMoment();
+    }
+  }
+
+  document.getElementById("desireBtn").addEventListener("click", handleClick);
+  updateHeadline();
+</script>
+</body>
+</html>
