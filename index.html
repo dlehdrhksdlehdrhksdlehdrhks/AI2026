@@ -258,8 +258,8 @@
             </a>
 
             <!-- Card 3: 진로 데이터 분석 -->
-            <a href="./data1/index.html" class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group"
-                 data-category="data" data-keywords="진로 데이터 분석 부산대학교 정보컴퓨터공학부 인공지능전공 컴퓨터공학전공 비교 분석">
+            <div class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group"
+                 data-category="data" data-keywords="나의 진로 리포트 커리어 로드맵 역량 레이더 차트 비전" onclick="openModal(3)">
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-ai-emerald/20 text-ai-emerald border border-ai-emerald/30">
@@ -269,37 +269,7 @@
                             <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
                         </div>
                     </div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-ai-emerald transition-colors">진로 데이터 분석</h3>
-                    <p class="text-slate-400 text-sm line-clamp-3 leading-relaxed mb-4">
-                        부산대학교 정보컴퓨터공학부의 <strong>인공지능전공</strong>과 <strong>컴퓨터공학전공</strong> 커리큘럼 및 진로 방향을 심층 비교 분석하여 적성에 맞는 전공을 탐색한 보고서.
-                    </p>
-                </div>
-                <div>
-                    <div class="flex flex-wrap gap-1.5 mb-4">
-                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#부산대정컴</span>
-                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#인공지능전공</span>
-                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#컴퓨터공학전공</span>
-                    </div>
-                    <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-ai-emerald font-semibold group-hover:translate-x-1 transition-transform">
-                        <span>상세 분석 보고서 보기</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </div>
-                </div>
-            </a>
-
-            <!-- Card 4: 나의 진로 리포트 -->
-            <div class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group"
-                 data-category="data" data-keywords="나의 진로 리포트 커리어 로드맵 역량 레이더 차트 비전" onclick="openModal(4)">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-ai-amber/20 text-ai-amber border border-ai-amber/30">
-                            04. 커리어 플랜
-                        </span>
-                        <div class="w-9 h-9 rounded-xl bg-ai-amber/10 flex items-center justify-center text-ai-amber group-hover:bg-ai-amber group-hover:text-white transition-colors">
-                            <i data-lucide="user-check" class="w-5 h-5"></i>
-                        </div>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-ai-amber transition-colors">나의 진로 리포트</h3>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-ai-emerald transition-colors">나의 진로 리포트</h3>
                     <p class="text-slate-400 text-sm line-clamp-3 leading-relaxed mb-4">
                         'AI 시대의 이동관' 역량 진단 보고서. SW 개발 능력, 인공지능 윤리관, 데이터 해석력 등 5가지 핵심 지표 레이더 차트 진단 및 10년 로드맵.
                     </p>
@@ -310,12 +280,42 @@
                         <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#10년로드맵</span>
                         <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#AI서비스기획자</span>
                     </div>
+                    <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-ai-emerald font-semibold group-hover:translate-x-1 transition-transform">
+                        <span>상세 분석 보고서 보기</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: 나의 진로 리포트 -->
+            <a href="./data1/index.html" class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group"
+                 data-category="data" data-keywords="진로 데이터 분석 부산대학교 정보컴퓨터공학부 인공지능전공 컴퓨터공학전공 비교 분석">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-ai-amber/20 text-ai-amber border border-ai-amber/30">
+                            04. 커리어 플랜
+                        </span>
+                        <div class="w-9 h-9 rounded-xl bg-ai-amber/10 flex items-center justify-center text-ai-amber group-hover:bg-ai-amber group-hover:text-white transition-colors">
+                            <i data-lucide="user-check" class="w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 group-hover:text-ai-amber transition-colors">진로 데이터 분석</h3>
+                    <p class="text-slate-400 text-sm line-clamp-3 leading-relaxed mb-4">
+                        부산대학교 정보컴퓨터공학부의 <strong>인공지능전공</strong>과 <strong>컴퓨터공학전공</strong> 커리큘럼 및 진로 방향을 심층 비교 분석하여 적성에 맞는 전공을 탐색한 보고서.
+                    </p>
+                </div>
+                <div>
+                    <div class="flex flex-wrap gap-1.5 mb-4">
+                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#부산대정컴</span>
+                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#인공지능전공</span>
+                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#컴퓨터공학전공</span>
+                    </div>
                     <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-ai-amber font-semibold group-hover:translate-x-1 transition-transform">
                         <span>진로 비전 & 역량 평가 열람</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Card 5: 지역 문제 데이터 분석 -->
             <div class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group"
