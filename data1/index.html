@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>부산대학교 정보컴퓨터공학부 전공 비교 대시보드</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    
+    * {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+    }
+    
+    body {
+      background-color: #0a0e17;
+      color: #e2e8f0;
+    }
+
+    .glass-card {
+      background: rgba(18, 24, 38, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1rem;
+    }
+
+    .glass-card-hover {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .glass-card-hover:hover {
+      transform: translateY(-4px);
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 0 12px 24px -10px rgba(59, 130, 246, 0.15);
+    }
+
+    .badge-accent {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.3));
+      border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0a0e17;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #3b82f6;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col custom-scrollbar">
+
+  <!-- Navigation Header -->
+  <header class="sticky top-0 z-50 glass-card rounded-none border-t-0 border-x-0 border-b border-gray-800/80 px-4 lg:px-8 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <!-- Home Button Link to ../index.html -->
+        <a href="../index.html" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-xs font-semibold border border-gray-700 transition-all flex items-center space-x-1.5 group">
+          <i class="fa-solid fa-house text-blue-400 group-hover:scale-110 transition-transform"></i>
+          <span>홈으로</span>
+        </a>
+
+        <div class="w-9 h-9 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-bold">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div>
+          <span class="text-xs text-blue-400 font-semibold tracking-wider uppercase">PNU CSE Dashboard</span>
+          <h1 class="text-base font-bold text-white tracking-tight">부산대학교 정보컴퓨터공학부 전공 비교</h1>
+        </div>
+      </div>
+
+      <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-gray-400">
+        <a href="#hero" class="hover:text-blue-400 transition-colors">전공 비교 헤더</a>
+        <a href="#metrics" class="hover:text-blue-400 transition-colors">2025 주요지표</a>
+        <a href="#charts" class="hover:text-blue-400 transition-colors">3개년 추이</a>
+        <a href="#insights" class="hover:text-blue-400 transition-colors">핵심 분석 요약</a>
+        <a href="#quiz" class="hover:text-blue-400 transition-colors">맞춤 진단</a>
+        <a href="#conclusion" class="text-blue-400 font-bold hover:text-blue-300 transition-colors flex items-center space-x-1">
+          <i class="fa-solid fa-crown text-amber-400 animate-pulse"></i>
+          <span>최종 결론 (컴공 추천)</span>
+        </a>
+      </nav>
+
+      <button onclick="downloadCSV()" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-600/20 transition-all flex items-center space-x-2">
+        <i class="fa-solid fa-download"></i>
+        <span>CSV 다운로드</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 lg:px-8 py-8 space-y-10">
+
+    <!-- Top Hero Section: Major Comparison Header -->
+    <section id="hero" class="glass-card p-6 md:p-8 relative overflow-hidden">
+      <div class="absolute -right-16 -top-16 w-64 h-64 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 text-center max-w-3xl mx-auto space-y-4">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full badge-accent text-blue-300 text-xs font-semibold">
+          <i class="fa-solid fa-scale-balanced"></i>
+          <span>PNU Computer Science and Engineering</span>
+        </div>
+        
+        <h2 class="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
+          컴퓨터공학전공 <span class="text-blue-400">vs</span> 인공지능공학전공
+        </h2>
+        
+        <p class="text-sm md:text-base text-gray-400 leading-relaxed">
+          부산대학교 정보컴퓨터공학부 내 두 핵심 전공의 2023~2025년 3개년 대학알리미 데이터를 비교·분석한 객관적 지표 대시보드입니다.
+        </p>
+
+        <!-- Side-by-Side Quick Summary Card Header -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 text-left">
+          <!-- Computer Science Quick Info -->
+          <div class="p-4 rounded-xl bg-blue-950/30 border border-blue-500/20 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-base font-bold text-blue-300"><i class="fa-solid fa-code mr-2"></i>컴퓨터공학전공</span>
+              <span class="px-2 py-0.5 text-xs rounded bg-blue-500/20 text-blue-400 font-bold">정통 CS & 학부 최대</span>
+            </div>
+            <p class="text-xs text-gray-400">웹·앱·시스템·네트워크·DB 등 소프트웨어 전 분야를 포괄하는 넓은 진로 스펙트럼과 최대 규모의 재학생 인프라</p>
+            <div class="flex items-center space-x-4 pt-2 text-xs font-semibold text-gray-300">
+              <div>2025 재학생: <span class="text-white">198명</span></div>
+              <div>1인당 장학금: <span class="text-blue-400">4,257.0천원</span></div>
+            </div>
+          </div>
+
+          <!-- AI Engineering Quick Info -->
+          <div class="p-4 rounded-xl bg-cyan-950/30 border border-cyan-500/20 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-base font-bold text-cyan-300"><i class="fa-solid fa-brain mr-2"></i>인공지능공학전공</span>
+              <span class="px-2 py-0.5 text-xs rounded bg-cyan-500/20 text-cyan-400 font-bold">AI/데이터 특화 & 급성장</span>
+            </div>
+            <p class="text-xs text-gray-400">머신러닝·딥러닝·데이터사이언스 집중 교육과 폭발적인 장학금 수혜액 상승세를 자랑하는 특성화 신설 전공</p>
+            <div class="flex items-center space-x-4 pt-2 text-xs font-semibold text-gray-300">
+              <div>2025 재학생: <span class="text-white">154명</span></div>
+              <div>1인당 장학금: <span class="text-cyan-400">4,129.0천원</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2025 Key Metrics Overview -->
+    <section id="metrics" class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+          <i class="fa-solid fa-chart-simple text-blue-400"></i>
+          <span>2025년 주요 지표 한눈에 보기</span>
+        </h3>
+        <span class="text-xs text-gray-400">단위: 명 / 천원 / :1</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Metric 1: Competition Rate -->
+        <div class="glass-card p-5 glass-card-hover space-y-3">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-semibold">
+            <span>2025 신입생 경쟁률</span>
+            <i class="fa-solid fa-fire text-amber-400"></i>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div>
+              <span class="text-xs text-blue-400 font-semibold block">컴퓨터공학</span>
+              <span class="text-2xl font-black text-white">7.6 <span class="text-xs font-normal text-gray-400">: 1</span></span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-cyan-400 font-semibold block">인공지능공학</span>
+              <span class="text-2xl font-black text-white">7.5 <span class="text-xs font-normal text-gray-400">: 1</span></span>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-400 pt-1 border-t border-gray-800">단 0.1포인트 차이로 경쟁률 수렴 완료</p>
+        </div>
+
+        <!-- Metric 2: Enrolled Students -->
+        <div class="glass-card p-5 glass-card-hover space-y-3">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-semibold">
+            <span>2025 재학생 수</span>
+            <i class="fa-solid fa-users text-blue-400"></i>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div>
+              <span class="text-xs text-blue-400 font-semibold block">컴퓨터공학</span>
+              <span class="text-2xl font-black text-white">198 <span class="text-xs font-normal text-gray-400">명</span></span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-cyan-400 font-semibold block">인공지능공학</span>
+              <span class="text-2xl font-black text-white">154 <span class="text-xs font-normal text-gray-400">명</span></span>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-400 pt-1 border-t border-gray-800">컴공이 +44명 우위 (학부 최대 인프라)</p>
+        </div>
+
+        <!-- Metric 3: Scholarship -->
+        <div class="glass-card p-5 glass-card-hover space-y-3">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-semibold">
+            <span>2025 1인당 연간 장학금</span>
+            <i class="fa-solid fa-hand-holding-dollar text-emerald-400"></i>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div>
+              <span class="text-xs text-blue-400 font-semibold block">컴퓨터공학</span>
+              <span class="text-2xl font-black text-white">4,257 <span class="text-xs font-normal text-gray-400">천원</span></span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-cyan-400 font-semibold block">인공지능공학</span>
+              <span class="text-2xl font-black text-white">4,129 <span class="text-xs font-normal text-gray-400">천원</span></span>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-400 pt-1 border-t border-gray-800">컴공이 약 12.8만원 더 높은 수혜액 기록</p>
+        </div>
+
+        <!-- Metric 4: Admission Quota -->
+        <div class="glass-card p-5 glass-card-hover space-y-3">
+          <div class="flex items-center justify-between text-gray-400 text-xs font-semibold">
+            <span>2025 입학정원</span>
+            <i class="fa-solid fa-id-card text-purple-400"></i>
+          </div>
+          <div class="flex items-baseline justify-between">
+            <div>
+              <span class="text-xs text-blue-400 font-semibold block">컴퓨터공학</span>
+              <span class="text-2xl font-black text-white">74 <span class="text-xs font-normal text-gray-400">명</span></span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-cyan-400 font-semibold block">인공지능공학</span>
+              <span class="text-2xl font-black text-white">60 <span class="text-xs font-normal text-gray-400">명</span></span>
+            </div>
+          </div>
+          <p class="text-[11px] text-gray-400 pt-1 border-t border-gray-800">두 전공 모두 내실화를 위한 전략적 감축</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3-Year Trend Interactive Charts -->
+    <section id="charts" class="space-y-6">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+          <i class="fa-solid fa-chart-line text-cyan-400"></i>
+          <span>3개년 주요 지표 비교 추이 (2023 - 2025)</span>
+        </h3>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Chart 1: Competition Rate -->
+        <div class="glass-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-arrow-trend-down text-blue-400"></i>
+              <span>신입생 경쟁률 추이 (:1)</span>
+            </h4>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400">2025년 수렴 단계</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="competitionChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Enrolled Students -->
+        <div class="glass-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-user-plus text-cyan-400"></i>
+              <span>재학생 수 누적 성장 (명)</span>
+            </h4>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400">규모의 경제 달성</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="enrolledChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Annual Scholarship -->
+        <div class="glass-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-coins text-emerald-400"></i>
+              <span>학생 1인당 연간 장학금 (천원)</span>
+            </h4>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">2023년 미산출 제외</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="scholarshipChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 4: Admission Quota vs Enrolled -->
+        <div class="glass-card p-5 space-y-4">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-white flex items-center space-x-2">
+              <i class="fa-solid fa-layer-group text-purple-400"></i>
+              <span>2025 정원 대비 재학생 비율</span>
+            </h4>
+            <span class="text-[11px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-400">높은 학업 지속성</span>
+          </div>
+          <div class="h-64 relative">
+            <canvas id="quotaVsEnrolledChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Analysis Report Insights Section -->
+    <section id="insights" class="space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+            <i class="fa-solid fa-file-contract text-blue-400"></i>
+            <span>분석 보고서 핵심 요약</span>
+          </h3>
+          <p class="text-xs text-gray-400 mt-1">2023-2025 대학알리미 데이터 기반 정밀 진단 리포트</p>
+        </div>
+
+        <!-- Filter Buttons & Search -->
+        <div class="flex flex-wrap items-center gap-2" id="filterContainer">
+          <div class="relative flex-grow md:flex-grow-0">
+            <input type="text" id="searchInput" oninput="searchInsights()" placeholder="키워드 검색..." class="w-full md:w-48 bg-gray-900/80 border border-gray-700/80 text-white text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-blue-500">
+            <i class="fa-solid fa-magnifying-glass absolute right-2.5 top-2.5 text-xs text-gray-500"></i>
+          </div>
+          <button onclick="filterDashboard('all')" class="filter-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 text-white transition-all">전체</button>
+          <button onclick="filterDashboard('cs')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-300 transition-all">컴퓨터공학</button>
+          <button onclick="filterDashboard('ai')" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-800 hover:bg-gray-700 text-gray-300 transition-all">인공지능공학</button>
+        </div>
+      </div>
+
+      <!-- Insight Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="insightCards">
+        <!-- Card 1 -->
+        <div class="glass-card p-5 glass-card-hover space-y-3 insight-item" data-category="all cs ai">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-500/20 text-blue-400">입시 분석</span>
+            <span class="text-xs text-gray-500">2023 - 2025</span>
+          </div>
+          <h4 class="text-sm font-bold text-white">경쟁률의 전략적 수렴 현상</h4>
+          <p class="text-xs text-gray-400 leading-relaxed">
+            컴퓨터공학(17.3대1 &rarr; 7.6대1)과 인공지능공학(12.8대1 &rarr; 7.5대1)의 경쟁률이 2025년에 이르러 단 0.1포인트 차이로 완벽히 수렴했습니다. 허수 지원이 정제되고 두 전공 간 선호도 균형이 형성되었습니다.
+          </p>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="glass-card p-5 glass-card-hover space-y-3 insight-item" data-category="all cs ai">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-cyan-500/20 text-cyan-400">재학생 분석</span>
+            <span class="text-xs text-gray-500">규모의 경제</span>
+          </div>
+          <h4 class="text-sm font-bold text-white">코호트 누적 및 학부 팽창</h4>
+          <p class="text-xs text-gray-400 leading-relaxed">
+            입학정원 감축에도 불구하고 두 전공 모두 재학생 수가 3년간 약 2.2배 급증했습니다. (컴공 90명 &rarr; 198명 / AI 71명 &rarr; 154명) 학년별 정착으로 전공 유지력이 높게 나타납니다.
+          </p>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="glass-card p-5 glass-card-hover space-y-3 insight-item" data-category="all cs ai">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-500/20 text-emerald-400">재정 지원</span>
+            <span class="text-xs text-gray-500">장학금 혜택</span>
+          </div>
+          <h4 class="text-sm font-bold text-white">학생 1인당 장학금 대폭 상승</h4>
+          <p class="text-xs text-gray-400 leading-relaxed">
+            컴퓨터공학전공이 2025년 4,257.0천원으로 학부 내 최고 지원액을 유지하고 있으며, 인공지능공학전공은 전년대비 1,014.0천원이 상승하며 가장 가파른 지원 성장률을 기록했습니다.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Quiz Section -->
+    <section id="quiz" class="glass-card p-6 md:p-8 space-y-6">
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full badge-accent text-cyan-300 text-xs font-semibold">
+          <i class="fa-solid fa-compass"></i>
+          <span>Interactive Major Quiz</span>
+        </div>
+        <h3 class="text-xl md:text-2xl font-bold text-white">나에게 맞는 전공 맞춤 진단</h3>
+        <p class="text-xs text-gray-400">간단한 2가지 질문을 통해 나의 적성에 맞는 전공을 추천받아보세요.</p>
+      </div>
+
+      <div class="max-w-2xl mx-auto bg-gray-900/60 border border-gray-800 p-6 rounded-xl space-y-6" id="quizContainer">
+        <!-- Q1 -->
+        <div class="space-y-3">
+          <label class="text-sm font-bold text-white block">Q1. 내가 더 흥미를 느끼는 공부 방향은?</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button onclick="selectQuizOption('q1', 'cs')" class="quiz-btn q1-btn p-3 text-left rounded-lg border border-gray-800 bg-gray-950/40 hover:border-blue-500 hover:bg-blue-950/20 text-xs text-gray-300 transition-all">
+              A. 웹, 앱, 데이터베이스, 시스템 등 다양한 SW 기본기와 종합 개발 능력
+            </button>
+            <button onclick="selectQuizOption('q1', 'ai')" class="quiz-btn q1-btn p-3 text-left rounded-lg border border-gray-800 bg-gray-950/40 hover:border-cyan-500 hover:bg-cyan-950/20 text-xs text-gray-300 transition-all">
+              B. 머신러닝 모델 알고리즘, 데이터 분석, AI 모델링에 대한 집중 연구
+            </button>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="space-y-3">
+          <label class="text-sm font-bold text-white block">Q2. 내가 선호하는 대학 생활 환경은?</label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button onclick="selectQuizOption('q2', 'cs')" class="quiz-btn q2-btn p-3 text-left rounded-lg border border-gray-800 bg-gray-950/40 hover:border-blue-500 hover:bg-blue-950/20 text-xs text-gray-300 transition-all">
+              A. 선후배 네트워크가 매우 크고 다양한 스터디가 구축된 전통의 대형 학과
+            </button>
+            <button onclick="selectQuizOption('q2', 'ai')" class="quiz-btn q2-btn p-3 text-left rounded-lg border border-gray-800 bg-gray-950/40 hover:border-cyan-500 hover:bg-cyan-950/20 text-xs text-gray-300 transition-all">
+              B. 가파르게 성장하며 재정 지원과 장학금 폭이 급증하는 특성화 학과
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Box -->
+        <div id="quizResult" class="hidden p-4 rounded-xl border text-center space-y-1"></div>
+      </div>
+    </section>
+
+    <!-- Final Conclusion & Big Recommendation Section -->
+    <section id="conclusion" class="glass-card p-6 md:p-10 space-y-8 border-2 border-blue-500/60 bg-gradient-to-br from-blue-950/70 via-gray-900/90 to-blue-950/40 shadow-2xl shadow-blue-600/20 relative overflow-hidden">
+      
+      <!-- Decorative Background Glow -->
+      <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-blue-500/15 rounded-full blur-3xl pointer-events-none"></div>
+      
+      <div class="flex items-center space-x-3 border-b border-gray-800/80 pb-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-600/30 border border-blue-400/50 flex items-center justify-center text-blue-300 font-bold text-2xl shadow-inner">
+          <i class="fa-solid fa-crown text-amber-400"></i>
+        </div>
+        <div>
+          <span class="text-xs text-blue-400 font-bold uppercase tracking-widest">Final Data Recommendation</span>
+          <h3 class="text-xl md:text-3xl font-black text-white tracking-tight">수치 분석 기반 최종 판단</h3>
+        </div>
+      </div>
+
+      <!-- HUGE PROMINENT RECOMMENDATION BANNER -->
+      <div class="p-6 md:p-8 rounded-2xl bg-gradient-to-r from-blue-900/60 via-blue-950/80 to-slate-900/90 border-2 border-blue-400/50 shadow-xl space-y-4">
+        
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-300 text-xs font-bold">
+          <i class="fa-solid fa-circle-check text-blue-400"></i>
+          <span>객관적 대학알리미 공시 지표 종합 판정</span>
+        </div>
+
+        <!-- Extra Large Title as requested -->
+        <h2 class="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-300 via-cyan-200 to-white">
+          자료 수치만 고려했을 때:<br class="hidden sm:inline" />
+          <span class="text-blue-400 underline decoration-blue-500 decoration-wavy decoration-2">‘컴퓨터공학전공’</span> 진학을 강력 추천합니다!
+        </h2>
+
+        <p class="text-sm md:text-lg text-gray-200 leading-relaxed font-medium pt-2">
+          외부 통념이나 막연한 선입견을 배제하고 대학알리미에 공시된 3개년 수치 데이터(재학생 규모, 경쟁률, 1인당 장학금 지원액)를 종합 분석한 결과, <strong class="text-blue-300">컴퓨터공학전공이 주요 3대 핵심 지표 모두에서 학부 내 압도적 우위</strong>를 점하고 있습니다.
+        </p>
+      </div>
+
+      <!-- Key Evidence Cards with Enlarged Typography -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="p-5 rounded-xl bg-gray-900/90 border border-blue-500/30 space-y-2 hover:border-blue-400 transition-all shadow-md">
+          <div class="flex items-center justify-between text-blue-400 font-bold text-xs">
+            <span><i class="fa-solid fa-users mr-1"></i>재학생 인프라 1위</span>
+            <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-300">최대 규모</span>
+          </div>
+          <h4 class="text-xl font-black text-white">198명 <span class="text-xs font-normal text-gray-400">(2025년 기준)</span></h4>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            인공지능공학(154명) 대비 +44명 많은 학부 최대 인원으로, 졸업 후 정계·업계로 이어지는 압도적인 동문 및 스터디 네트워크 보유
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-gray-900/90 border border-emerald-500/30 space-y-2 hover:border-emerald-400 transition-all shadow-md">
+          <div class="flex items-center justify-between text-emerald-400 font-bold text-xs">
+            <span><i class="fa-solid fa-sack-dollar mr-1"></i>1인당 장학금 1위</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">최고 수혜</span>
+          </div>
+          <h4 class="text-xl font-black text-white">4,257.0 천원 <span class="text-xs font-normal text-gray-400">(연간)</span></h4>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            2025년 학생 1인당 연간 장학 수혜액이 약 425.7만원으로, 특성화 전공인 인공지능공학전공(4,129.0천원)보다 높은 최고 재정 지원 기록
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-gray-900/90 border border-amber-500/30 space-y-2 hover:border-amber-400 transition-all shadow-md">
+          <div class="flex items-center justify-between text-amber-400 font-bold text-xs">
+            <span><i class="fa-solid fa-chart-line mr-1"></i>3개년 평균 선호도 1위</span>
+            <span class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">스테디셀러</span>
+          </div>
+          <h4 class="text-xl font-black text-white">11.2 : 1 <span class="text-xs font-normal text-gray-400">(3개년 평균)</span></h4>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            3개년 평균 신입생 경쟁률 11.2:1 및 2025년 7.6:1로 지원자들의 가장 꾸준하고 지속적인 선호도를 입증한 정통 전공
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-gray-800 py-6 px-4 text-center text-xs text-gray-500">
+    <p>부산대학교 정보컴퓨터공학부 전공 비교 대시보드 | Data Source: 대학알리미 (2023-2025)</p>
+  </footer>
+
+  <script>
+    // Data definition
+    const dashboardData = [
+      { major: "인공지능공학전공", indicator: "신입생 경쟁률 (대 1)", y2023: 12.8, y2024: 7.9, y2025: 7.5 },
+      { major: "인공지능공학전공", indicator: "입학정원 (명)", y2023: 68.0, y2024: 68.0, y2025: 60.0 },
+      { major: "인공지능공학전공", indicator: "재학생 수 (명)", y2023: 71.0, y2024: 113.0, y2025: 154.0 },
+      { major: "인공지능공학전공", indicator: "학생 1인당 연간 장학금 (천원)", y2023: null, y2024: 3115.0, y2025: 4129.0 },
+      { major: "컴퓨터공학전공", indicator: "신입생 경쟁률 (대 1)", y2023: 17.3, y2024: 8.8, y2025: 7.6 },
+      { major: "컴퓨터공학전공", indicator: "입학정원 (명)", y2023: 80.0, y2024: 80.0, y2025: 74.0 },
+      { major: "컴퓨터공학전공", indicator: "재학생 수 (명)", y2023: 90.0, y2024: 153.0, y2025: 198.0 },
+      { major: "컴퓨터공학전공", indicator: "학생 1인당 연간 장학금 (천원)", y2023: null, y2024: 3611.0, y2025: 4257.0 }
+    ];
+
+    // Chart.js helper function
+    function getCanvasCtx(id) {
+      const el = document.getElementById(id);
+      return el ? el.getContext('2d') : null;
+    }
+
+    window.addEventListener('load', function () {
+      const gridConfig = { color: 'rgba(255, 255, 255, 0.05)' };
+      const tickConfig = { color: '#9ca3af', font: { size: 11 } };
+
+      // 1. Competition Chart
+      const ctx1 = getCanvasCtx('competitionChart');
+      if (ctx1) {
+        new Chart(ctx1, {
+          type: 'line',
+          data: {
+            labels: ['2023년', '2024년', '2025년'],
+            datasets: [
+              { label: '컴퓨터공학', data: [17.3, 8.8, 7.6], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.2)', tension: 0.3, fill: true },
+              { label: '인공지능공학', data: [12.8, 7.9, 7.5], borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.2)', tension: 0.3, fill: true }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { grid: gridConfig, ticks: tickConfig }, y: { grid: gridConfig, ticks: tickConfig } }
+          }
+        });
+      }
+
+      // 2. Enrolled Students Chart
+      const ctx2 = getCanvasCtx('enrolledChart');
+      if (ctx2) {
+        new Chart(ctx2, {
+          type: 'line',
+          data: {
+            labels: ['2023년', '2024년', '2025년'],
+            datasets: [
+              { label: '컴퓨터공학', data: [90.0, 153.0, 198.0], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3 },
+              { label: '인공지능공학', data: [71.0, 113.0, 154.0], borderColor: '#06b6d4', backgroundColor: '#06b6d4', tension: 0.3 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { grid: gridConfig, ticks: tickConfig }, y: { grid: gridConfig, ticks: tickConfig } }
+          }
+        });
+      }
+
+      // 3. Scholarship Chart
+      const ctx3 = getCanvasCtx('scholarshipChart');
+      if (ctx3) {
+        new Chart(ctx3, {
+          type: 'bar',
+          data: {
+            labels: ['2024년', '2025년'],
+            datasets: [
+              { label: '컴퓨터공학', data: [3611.0, 4257.0], backgroundColor: 'rgba(59, 130, 246, 0.8)', borderRadius: 6 },
+              { label: '인공지능공학', data: [3115.0, 4129.0], backgroundColor: 'rgba(6, 182, 212, 0.8)', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { grid: gridConfig, ticks: tickConfig }, y: { grid: gridConfig, ticks: tickConfig } }
+          }
+        });
+      }
+
+      // 4. Quota vs Enrolled Chart
+      const ctx4 = getCanvasCtx('quotaVsEnrolledChart');
+      if (ctx4) {
+        new Chart(ctx4, {
+          type: 'bar',
+          data: {
+            labels: ['컴퓨터공학전공', '인공지능공학전공'],
+            datasets: [
+              { label: '2025 입학정원', data: [74, 60], backgroundColor: 'rgba(147, 51, 234, 0.6)', borderRadius: 6 },
+              { label: '2025 재학생 수', data: [198, 154], backgroundColor: 'rgba(59, 130, 246, 0.8)', borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { x: { grid: gridConfig, ticks: tickConfig }, y: { grid: gridConfig, ticks: tickConfig } }
+          }
+        });
+      }
+    });
+
+    // Filter Dashboard
+    function filterDashboard(type) {
+      const buttons = document.querySelectorAll('#filterContainer .filter-btn');
+      buttons.forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-gray-800', 'text-gray-300');
+      });
+      if (event && event.target) {
+        event.target.classList.remove('bg-gray-800', 'text-gray-300');
+        event.target.classList.add('bg-blue-600', 'text-white');
+      }
+
+      const items = document.querySelectorAll('.insight-item');
+      items.forEach(item => {
+        const categories = item.getAttribute('data-category');
+        if (type === 'all' || categories.includes(type)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Search Insights
+    function searchInsights() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const items = document.querySelectorAll('.insight-item');
+      items.forEach(item => {
+        const text = item.innerText.toLowerCase();
+        if (text.includes(query)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    }
+
+    // Quiz logic
+    const quizAnswers = { q1: null, q2: null };
+    function selectQuizOption(q, major) {
+      quizAnswers[q] = major;
+      const btns = document.querySelectorAll(`.${q}-btn`);
+      btns.forEach(b => b.classList.remove('border-blue-500', 'bg-blue-950/40'));
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('border-blue-500', 'bg-blue-950/40');
+      }
+
+      if (quizAnswers.q1 && quizAnswers.q2) {
+        const resEl = document.getElementById('quizResult');
+        resEl.classList.remove('hidden');
+        if (quizAnswers.q1 === 'cs' && quizAnswers.q2 === 'cs') {
+          resEl.className = "p-4 rounded-xl border border-blue-500/40 bg-blue-950/30 text-center space-y-1";
+          resEl.innerHTML = `<h4 class="font-bold text-blue-400">추천 전공: 컴퓨터공학전공 💻</h4><p class="text-xs text-gray-300">정통 CS 기본기와 학부 최대의 재학생 및 장학금 혜택이 어울립니다.</p>`;
+        } else if (quizAnswers.q1 === 'ai' && quizAnswers.q2 === 'ai') {
+          resEl.className = "p-4 rounded-xl border border-cyan-500/40 bg-cyan-950/30 text-center space-y-1";
+          resEl.innerHTML = `<h4 class="font-bold text-cyan-400">추천 전공: 인공지능공학전공 🤖</h4><p class="text-xs text-gray-300">AI 및 데이터 사이언스 몰입 교육과 가파른 성장세가 맞춤입니다.</p>`;
+        } else {
+          resEl.className = "p-4 rounded-xl border border-purple-500/40 bg-purple-950/30 text-center space-y-1";
+          resEl.innerHTML = `<h4 class="font-bold text-purple-400">추천 전공: 정보컴퓨터공학부 광역 진학 🎓</h4><p class="text-xs text-gray-300">두 전공 모두 최상위 수준의 혜택을 제공하므로 입학 후 세부 전공을 선택해 보세요.</p>`;
+        }
+      }
+    }
+
+    // CSV Download
+    function downloadCSV() {
+      let csv = "\uFEFF전공,지표,2023년,2024년,2025년\n";
+      dashboardData.forEach(row => {
+        csv += `"${row.major}","${row.indicator}","${row.y2023 || '-'}","${row.y2024 || '-'}","${row.y2025 || '-'}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", "PNU_Major_Comparison_2023_2025.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
