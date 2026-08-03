@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>대학 공학계열 취업률 & 유지취업률 심층 분석 보고서</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0B0F17',
+                        cardbg: '#111827',
+                        cardborder: '#1F2937',
+                        accentcyan: '#06B6D4',
+                        accentblue: '#3B82F6',
+                        accentemerald: '#10B981',
+                        accentrose: '#F43F5E',
+                        accentamber: '#F59E0B',
+                        accentpurple: '#8B5CF6'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Pretendard', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom scrollbar for dark UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0B0F17;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1F2937;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px -5px rgba(6, 182, 212, 0.3);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 20px -5px rgba(16, 185, 129, 0.3);
+        }
+        .glow-purple {
+            box-shadow: 0 0 20px -5px rgba(139, 92, 246, 0.3);
+        }
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #38BDF8 0%, #818CF8 50%, #C084FC 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-darkbg text-gray-100 font-sans antialiased min-h-screen flex flex-col selection:bg-accentcyan selection:text-black">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gray-800 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <!-- Home Link requested by user -->
+            <a href="../index.html" class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium transition-all duration-200 border border-gray-700 hover:border-gray-600">
+                <i class="fa-solid fa-house text-accentcyan"></i>
+                <span>홈으로 돌아가기</span>
+            </a>
+            <div class="h-4 w-px bg-gray-700 hidden sm:block"></div>
+            <div class="hidden sm:flex items-center space-x-2 text-xs text-gray-400">
+                <span class="bg-accentcyan/10 text-accentcyan border border-accentcyan/20 px-2 py-0.5 rounded font-mono">공시 데이터 분석</span>
+                <span>최근 3개년 공학계열 심층 보고서</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <button onclick="scrollToSection('conclusion-section')" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-accentcyan to-accentblue text-black font-semibold text-xs sm:text-sm hover:opacity-90 transition shadow-lg">
+                <i class="fa-solid fa-lightbulb mr-1"></i> 핵심 결론 바로가기
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-900 via-gray-900 to-gray-950 p-6 sm:p-10 border border-gray-800 shadow-2xl">
+            <div class="absolute -top-24 -right-24 w-96 h-96 bg-accentcyan/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-accentpurple/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 space-y-6">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-accentcyan/10 border border-accentcyan/30 text-accentcyan text-xs font-semibold">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>12개 주요 대학 공학계열 3개년 공시 종합</span>
+                </div>
+                
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+                    공학계열 <span class="gradient-text">취업의 양과 질</span> 격차 분석
+                </h1>
+                
+                <p class="text-gray-300 text-base sm:text-lg max-w-3xl leading-relaxed">
+                    단순 취업률은 높으나 유지취업률에서 나타나는 권역별·설립유형별 양극화 현상을 분석합니다. 
+                    단순 수치 너머의 <strong class="text-white underline decoration-accentcyan">실질 고용 안정성(유지취업률)</strong>과 
+                    지방거점국립대 및 첨단/계약학과가 가진 구조적 고용 방어력을 검증합니다.
+                </p>
+
+                <!-- Navigation Quick Anchor Tabs -->
+                <div class="pt-4 flex flex-wrap gap-2 text-xs sm:text-sm">
+                    <button onclick="scrollToSection('kpi-overview')" class="px-3.5 py-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-database text-accentcyan"></i> 1. 통합 수치
+                    </button>
+                    <button onclick="scrollToSection('matrix-section')" class="px-3.5 py-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-table-cells-large text-accentblue"></i> 2. 2x2 매트릭스
+                    </button>
+                    <button onclick="scrollToSection('major-section')" class="px-3.5 py-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-microchip text-accentemerald"></i> 3. 전공별 이탈률
+                    </button>
+                    <button onclick="scrollToSection('case-section')" class="px-3.5 py-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-300 border border-gray-700 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-magnifying-glass-chart text-accentamber"></i> 4. 사례 비교
+                    </button>
+                    <button onclick="scrollToSection('conclusion-section')" class="px-3.5 py-2 rounded-xl bg-accentcyan/20 hover:bg-accentcyan/30 text-accentcyan border border-accentcyan/40 transition font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-flag-checkered"></i> 5. 종합 인사이트 (메인)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 1: Overall Summary Stats -->
+        <section id="kpi-overview" class="space-y-6">
+            <div class="flex items-center justify-between">
+                <div class="space-y-1">
+                    <div class="text-xs font-mono text-accentcyan uppercase tracking-wider">SECTION 01</div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie text-accentcyan"></i> 전체 데이터 개요 및 통합 수치
+                    </h2>
+                </div>
+                <span class="text-xs text-gray-400 bg-gray-800 px-3 py-1 rounded-full border border-gray-700">3개년 평균 지표</span>
+            </div>
+
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-cardbg border border-cardborder rounded-2xl p-6 relative overflow-hidden group hover:border-accentcyan/50 transition duration-300">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-gray-400 text-sm font-medium">단순 취업률</span>
+                        <div class="w-10 h-10 rounded-xl bg-accentcyan/10 border border-accentcyan/30 flex items-center justify-center text-accentcyan">
+                            <i class="fa-solid fa-briefcase"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline space-x-3">
+                        <span class="text-4xl font-extrabold text-white">71.2%</span>
+                        <span class="text-xs text-gray-400">졸업자 중 취업자 비율</span>
+                    </div>
+                    <p class="mt-4 text-xs text-gray-400 leading-relaxed border-t border-gray-800 pt-3">
+                        진학자, 입대자, 해외이주자 등 제외 대상 산정 기준 반영
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-cardbg border border-cardborder rounded-2xl p-6 relative overflow-hidden group hover:border-accentemerald/50 transition duration-300 glow-emerald">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-gray-400 text-sm font-medium">4차 유지취업률</span>
+                        <div class="w-10 h-10 rounded-xl bg-accentemerald/10 border border-accentemerald/30 flex items-center justify-center text-accentemerald">
+                            <i class="fa-solid fa-shield-halved"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline space-x-3">
+                        <span class="text-4xl font-extrabold text-accentemerald">89.5%</span>
+                        <span class="text-xs text-emerald-400/80 font-medium">고용 지속성 확보</span>
+                    </div>
+                    <p class="mt-4 text-xs text-gray-400 leading-relaxed border-t border-gray-800 pt-3">
+                        취업 후 약 1년간(11개월 이상) 건강보험 등 고용 유지 비율
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-cardbg border border-cardborder rounded-2xl p-6 relative overflow-hidden group hover:border-accentamber/50 transition duration-300">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="text-gray-400 text-sm font-medium">이탈률 지표 (Gap / 실질 이탈)</span>
+                        <div class="w-10 h-10 rounded-xl bg-accentamber/10 border border-accentamber/30 flex items-center justify-center text-accentamber">
+                            <i class="fa-solid fa-arrows-split-up-and-left"></i>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline space-x-3">
+                        <span class="text-4xl font-extrabold text-accentamber">-18.3%p</span>
+                        <span class="text-xs text-gray-400">실질 이탈: <strong>~10.5%</strong></span>
+                    </div>
+                    <p class="mt-4 text-xs text-gray-400 leading-relaxed border-t border-gray-800 pt-3">
+                        산식상 음수(-18.3%p)는 유지율 Base가 높음을 의미하며, 모자란 10.5%가 1년 내 실질 고용 이탈 규모입니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: Comprehensive Conclusions & Strategic Insights (PLACED PROMINENTLY) -->
+        <section id="conclusion-section" class="space-y-6 pt-4">
+            <div class="bg-gradient-to-br from-indigo-950/60 via-gray-900 to-purple-950/40 rounded-3xl p-6 sm:p-8 border border-indigo-500/30 shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10 text-indigo-400 text-9xl font-black pointer-events-none">
+                    INSIGHT
+                </div>
+
+                <div class="relative z-10 space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-500/20 pb-4">
+                        <div>
+                            <span class="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-extrabold tracking-wide uppercase">
+                                MAIN FEATURE
+                            </span>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-2 flex items-center gap-3">
+                                <i class="fa-solid fa-lightbulb text-accentamber"></i> 5. 보고서 결론용 종합 인사이트
+                            </h2>
+                        </div>
+                        <p class="text-xs text-indigo-200/80 bg-indigo-900/40 px-3 py-2 rounded-xl border border-indigo-700/40">
+                            대학 정책 수립 및 교육부 공시 데이터 해석의 3가지 핵심 축
+                        </p>
+                    </div>
+
+                    <!-- Insight Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        
+                        <!-- Insight Card 1 -->
+                        <div class="bg-gray-900/90 border border-indigo-800/50 rounded-2xl p-6 hover:border-indigo-400 transition-all duration-300 flex flex-col justify-between">
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 font-bold">
+                                        01
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white leading-snug">
+                                        단순 취업률 vs 유지취업률의 비대칭성
+                                    </h3>
+                                </div>
+                                <div class="p-3 bg-rose-950/30 border border-rose-900/40 rounded-xl text-xs text-rose-200">
+                                    <i class="fa-solid fa-triangle-exclamation mr-1 text-rose-400"></i>
+                                    <strong>허수 취업 경계:</strong> 단순 취업률 착시 현상 주의
+                                </div>
+                                <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+                                    단순 취업률은 높지만 유지취업률이 낮은 학과는 주로 <strong>현장 노동 강도가 높거나(건축/토목)</strong> 중소기업 취업 비중이 높은 경우입니다.
+                                </p>
+                                <p class="text-gray-400 text-xs leading-relaxed">
+                                    '일단 취업'에는 성공하지만 처우나 비전에 실망해 1년 내 퇴사하는 '허수 취업'이 존재하므로, 수치 나열식 평가보다 유지율 기반의 질적 관리가 시급합니다.
+                                </p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-gray-800 text-xs text-indigo-300 font-medium flex items-center justify-between">
+                                <span>시사점: 질적 고용 모니터링 체계 도입</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                        </div>
+
+                        <!-- Insight Card 2 -->
+                        <div class="bg-gray-900/90 border border-indigo-800/50 rounded-2xl p-6 hover:border-accentcyan transition-all duration-300 flex flex-col justify-between">
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-accentcyan/20 border border-accentcyan/40 flex items-center justify-center text-accentcyan font-bold">
+                                        02
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white leading-snug">
+                                        지방 거점 국립대(지거국)의 구조적 강점
+                                    </h3>
+                                </div>
+                                <div class="p-3 bg-cyan-950/30 border border-cyan-900/40 rounded-xl text-xs text-cyan-200">
+                                    <i class="fa-solid fa-shield-heart mr-1 text-accentcyan"></i>
+                                    <strong>강력한 고용 방어력:</strong> 4차 유지율 91.8% 기록
+                                </div>
+                                <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+                                    지거국 공학계열은 수도권 사립대보다 양적 취업률은 낮을 수 있으나, <strong>유지취업률에서 강력한 상향 평준화</strong>를 보입니다.
+                                </p>
+                                <p class="text-gray-400 text-xs leading-relaxed">
+                                    지역 내 공공기관(혁신도시 이전 기관) 채용 할당제와 울산/창원/구미 등 대기업 생산 거점과의 강력한 산학 네트워크가 한 번 잡은 일자리의 지속성을 보장합니다.
+                                </p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-gray-800 text-xs text-accentcyan font-medium flex items-center justify-between">
+                                <span>시사점: 거점 국립대 산학 인프라 활용</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                        </div>
+
+                        <!-- Insight Card 3 -->
+                        <div class="bg-gray-900/90 border border-indigo-800/50 rounded-2xl p-6 hover:border-accentemerald transition-all duration-300 flex flex-col justify-between">
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-xl bg-accentemerald/20 border border-accentemerald/40 flex items-center justify-center text-accentemerald font-bold">
+                                        03
+                                    </div>
+                                    <h3 class="text-lg font-bold text-white leading-snug">
+                                        계약학과 및 융합공학의 압도적 우위
+                                    </h3>
+                                </div>
+                                <div class="p-3 bg-emerald-950/30 border border-emerald-900/40 rounded-xl text-xs text-emerald-200">
+                                    <i class="fa-solid fa-award mr-1 text-accentemerald"></i>
+                                    <strong>독보적 고용 질:</strong> 3개년 95~100% 유지율
+                                </div>
+                                <p class="text-gray-300 text-xs sm:text-sm leading-relaxed">
+                                    삼성전자·SK하이닉스 등 대기업 연계 계약학과 및 IT 기반 융합공학은 3개년 연속 <strong>95% 이상의 압도적 유지율</strong>을 기록합니다.
+                                </p>
+                                <p class="text-gray-400 text-xs leading-relaxed">
+                                    단순 공급 중심의 공학 교육에서 벗어나 특정 첨단 산업군에 타깃팅된 전문화된 공학 전공 개편이 미래 대학 취업 경쟁력의 핵심 지표가 될 것입니다.
+                                </p>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-gray-800 text-xs text-accentemerald font-medium flex items-center justify-between">
+                                <span>시사점: 타깃형 맞춤 교육과정 확대</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Interactive Strategic Simulator Tool -->
+                    <div class="mt-8 pt-6 border-t border-gray-800 bg-gray-950/70 rounded-2xl p-6 border border-gray-800">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                            <div>
+                                <h4 class="text-base font-bold text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-sliders text-accentpurple"></i> 대학 맞춤형 취업 리스크 및 고용 지속성진단 시뮬레이터
+                                </h4>
+                                <p class="text-xs text-gray-400">대학 설립 유형과 주력 전공 구성을 선택하여 고용 안전성 예측 결과를 확인해보세요.</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">대학 설립 및 권역 유형</label>
+                                <select id="sim-type" onchange="runSimulation()" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-accentcyan">
+                                    <option value="g3">비수도권 국립대 (그룹 3 - 지거국)</option>
+                                    <option value="g1">수도권 국립대 (그룹 1)</option>
+                                    <option value="g2">수도권 사립대 (그룹 2)</option>
+                                    <option value="g4">비수도권 사립대 (그룹 4)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">주력 학과 계열 구성</label>
+                                <select id="sim-major" onchange="runSimulation()" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-accentcyan">
+                                    <option value="it_contract">IT · 첨단 / 대기업 계약학과 중심</option>
+                                    <option value="balanced">전통 제조공학 + IT 균형 구성</option>
+                                    <option value="traditional">전통 현장공학 (건축/토목/소재) 중심</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1">산학 연계 및 공공기관 협력 수준</label>
+                                <select id="sim-collab" onchange="runSimulation()" class="w-full bg-gray-800 border border-gray-700 rounded-xl p-2.5 text-sm text-white focus:outline-none focus:border-accentcyan">
+                                    <option value="high">높음 (지역거점/대기업 채용연계)</option>
+                                    <option value="medium">보통 (일반 산학 협력)</option>
+                                    <option value="low">낮음 (단순 채용공고 연계 위주)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Result Box -->
+                        <div id="sim-result" class="p-4 rounded-xl bg-gray-900 border border-gray-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                            <!-- Populated via JavaScript -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: 2x2 Matrix (Region x Establishment) -->
+        <section id="matrix-section" class="space-y-6">
+            <div class="space-y-1">
+                <div class="text-xs font-mono text-accentblue uppercase tracking-wider">SECTION 02</div>
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-table-cells-large text-accentblue"></i> 2x2 매트릭스 비교 (권역 x 설립유형)
+                </h2>
+                <p class="text-xs text-gray-400">클릭하여 각 대학 그룹별 세부 고용 특성을 확인하세요.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- 2x2 Interactive Visual Matrix Grid (8 cols) -->
+                <div class="lg:col-span-7 bg-cardbg border border-cardborder rounded-2xl p-4 sm:p-6 space-y-4">
+                    <div class="grid grid-cols-2 gap-3 text-center text-xs font-bold text-gray-400 pb-2 border-b border-gray-800">
+                        <div>국립 대학 (그룹 1, 3)</div>
+                        <div>사립 대학 (그룹 2, 4)</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <!-- Group 1 -->
+                        <button onclick="selectMatrixGroup(1)" id="btn-g1" class="matrix-btn text-left p-4 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-accentblue transition relative group">
+                            <div class="text-xs font-semibold text-gray-400 mb-1 flex items-center justify-between">
+                                <span>[그룹 1] 수도권 국립</span>
+                                <span class="text-2xl opacity-20">🏛️</span>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="text-sm font-bold text-white">단순: 69.8%</div>
+                                <div class="text-sm font-bold text-accentemerald">유지: 88.2%</div>
+                                <div class="text-xs text-accentamber">Gap: -18.4%p</div>
+                            </div>
+                        </button>
+
+                        <!-- Group 2 -->
+                        <button onclick="selectMatrixGroup(2)" id="btn-g2" class="matrix-btn text-left p-4 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-accentblue transition relative group">
+                            <div class="text-xs font-semibold text-gray-400 mb-1 flex items-center justify-between">
+                                <span>[그룹 2] 수도권 사립</span>
+                                <span class="text-2xl opacity-20">🏫</span>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="text-sm font-bold text-white">단순: 78.5%</div>
+                                <div class="text-sm font-bold text-accentemerald">유지: 93.6%</div>
+                                <div class="text-xs text-accentamber">Gap: -15.1%p</div>
+                            </div>
+                        </button>
+
+                        <!-- Group 3 (Highlighted) -->
+                        <button onclick="selectMatrixGroup(3)" id="btn-g3" class="matrix-btn text-left p-4 rounded-xl border-2 border-accentcyan/60 bg-accentcyan/10 hover:border-accentcyan transition relative group glow-cyan">
+                            <div class="text-xs font-bold text-accentcyan mb-1 flex items-center justify-between">
+                                <span>[그룹 3] 비수도권 국립 (지거국)</span>
+                                <span class="text-xs px-1.5 py-0.5 rounded bg-accentcyan text-black font-bold">핵심 방어</span>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="text-sm font-bold text-white">단순: 66.4%</div>
+                                <div class="text-base font-extrabold text-accentcyan">유지: 91.8%</div>
+                                <div class="text-xs text-accentamber">Gap: -25.4%p</div>
+                            </div>
+                        </button>
+
+                        <!-- Group 4 -->
+                        <button onclick="selectMatrixGroup(4)" id="btn-g4" class="matrix-btn text-left p-4 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-accentblue transition relative group">
+                            <div class="text-xs font-semibold text-gray-400 mb-1 flex items-center justify-between">
+                                <span>[그룹 4] 비수도권 사립</span>
+                                <span class="text-2xl opacity-20">🏭</span>
+                            </div>
+                            <div class="space-y-1">
+                                <div class="text-sm font-bold text-white">단순: 62.1%</div>
+                                <div class="text-sm font-bold text-accentemerald">유지: 85.9%</div>
+                                <div class="text-xs text-accentamber">Gap: -23.8%p</div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Highlighted Box for Group 3 Analysis -->
+                    <div class="p-4 rounded-xl bg-gray-900 border border-gray-800 text-xs sm:text-sm text-gray-300 leading-relaxed space-y-2">
+                        <div class="font-bold text-accentcyan flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i> [핵심 분석] 비수도권 국립대(지거국)의 고용 방어력
+                        </div>
+                        <p>
+                            비수도권 국립대(경북대, 부산대 등)는 비수도권 사립대 대비 단순 취업률은 <strong>+4.3%p</strong>, 
+                            유지취업률은 <strong>+5.9%p</strong> 높게 형성되어 강력한 고용 방어력을 입증했습니다.
+                        </p>
+                        <p class="text-gray-400 text-xs">
+                            특히 유지취업률(91.8%)은 수도권 국립대(88.2%)를 상회하여, 공공기관 이전 채용 및 지역 거점 산업 인프라 기반의 질 높은 일자리 점유율이 높음을 입증합니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Matrix Detail Card / Interactive Chart (5 cols) -->
+                <div class="lg:col-span-5 bg-cardbg border border-cardborder rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                    <div>
+                        <div id="matrix-detail-title" class="text-lg font-bold text-white mb-2">
+                            [그룹 3] 비수도권 국립 대학 심층 분석
+                        </div>
+                        <div id="matrix-detail-body" class="text-xs text-gray-300 space-y-3 leading-relaxed">
+                            <!-- JS Populated -->
+                        </div>
+                    </div>
+
+                    <!-- Group Comparison Chart -->
+                    <div class="pt-4 border-t border-gray-800">
+                        <div class="text-xs font-semibold text-gray-400 mb-2">그룹별 단순 vs 유지 취업률 비교</div>
+                        <div class="h-44 relative">
+                            <canvas id="matrixChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: Detailed Engineering Major Analysis -->
+        <section id="major-section" class="space-y-6">
+            <div class="space-y-1">
+                <div class="text-xs font-mono text-accentemerald uppercase tracking-wider">SECTION 03</div>
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-microchip text-accentemerald"></i> 세부 공학 전공별 이탈률 양상
+                </h2>
+                <p class="text-xs text-gray-400">IT·첨단 기술 분야와 전통 제조·건설 분야 간의 고용 안정성 및 이탈 양상</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- IT/Advanced Engineering Card -->
+                <div class="bg-cardbg border border-accentemerald/30 rounded-2xl p-6 space-y-4 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-accentemerald/5 rounded-full blur-2xl"></div>
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-laptop-code text-accentemerald text-xl"></i>
+                            <h3 class="text-lg font-bold text-white">IT · 첨단 공학</h3>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-accentemerald/10 text-accentemerald border border-accentemerald/30 font-semibold">
+                            초고유지형
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-gray-400">컴퓨터, 소프트웨어, 반도체, 모바일공학 등</p>
+
+                    <div class="grid grid-cols-2 gap-4 my-2">
+                        <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
+                            <div class="text-xs text-gray-400">단순 취업률</div>
+                            <div class="text-2xl font-bold text-white mt-1">75.4%</div>
+                        </div>
+                        <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
+                            <div class="text-xs text-gray-400">4차 유지취업률</div>
+                            <div class="text-2xl font-bold text-accentemerald mt-1">94.2%</div>
+                        </div>
+                    </div>
+
+                    <ul class="text-xs text-gray-300 space-y-2 leading-relaxed">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-accentemerald mt-0.5"></i>
+                            <span><strong>계약학과 특수성:</strong> 삼성전자, SK하이닉스 연계 계약학과의 경우 유지취업률 <strong>98~100%</strong>로 이탈이 사실상 전무.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-check text-accentemerald mt-0.5"></i>
+                            <span>높은 처우와 직무 만족도, 명확한 커리어 패스로 인해 1년 내 직장 이탈 비율이 매우 낮음.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Traditional Engineering Card -->
+                <div class="bg-cardbg border border-accentamber/30 rounded-2xl p-6 space-y-4 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-accentamber/5 rounded-full blur-2xl"></div>
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-compass-drafting text-accentamber text-xl"></i>
+                            <h3 class="text-lg font-bold text-white">전통 공학</h3>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-accentamber/10 text-accentamber border border-accentamber/30 font-semibold">
+                            이탈주의형
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-gray-400">건축/토목, 환경공학, 섬유/파이버시스템 등</p>
+
+                    <div class="grid grid-cols-2 gap-4 my-2">
+                        <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
+                            <div class="text-xs text-gray-400">단순 취업률</div>
+                            <div class="text-2xl font-bold text-white mt-1">68.2%</div>
+                        </div>
+                        <div class="bg-gray-900/80 p-3 rounded-xl border border-gray-800">
+                            <div class="text-xs text-gray-400">4차 유지취업률</div>
+                            <div class="text-2xl font-bold text-accentamber mt-1">88.6%</div>
+                        </div>
+                    </div>
+
+                    <ul class="text-xs text-gray-300 space-y-2 leading-relaxed">
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-accentamber mt-0.5"></i>
+                            <span><strong>유지율 격차:</strong> IT 계열 대비 유지취업률이 <strong>5.6%p 낮게</strong> 형성됨.</span>
+                        </li>
+                        <li class="flex items-start gap-2">
+                            <i class="fa-solid fa-triangle-exclamation text-accentamber mt-0.5"></i>
+                            <span>건설 현장 근무, 지방 사업장 발령, 업황 변동성 및 직무 부적응으로 인한 초기 이직/퇴직 빈번.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: Case Study & Department Deep Dive -->
+        <section id="case-section" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <div class="text-xs font-mono text-accentamber uppercase tracking-wider">SECTION 04</div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart text-accentamber"></i> 우수 학과 및 특이 사례 발굴 (Case Study)
+                    </h2>
+                </div>
+
+                <!-- Table Filter Buttons -->
+                <div class="flex items-center space-x-2 bg-gray-900 p-1 rounded-xl border border-gray-800 self-start">
+                    <button onclick="filterCases('all')" id="case-btn-all" class="case-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-gray-800">
+                        전체 보기
+                    </button>
+                    <button onclick="filterCases('high')" id="case-btn-high" class="case-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white">
+                        고품질 유지형 (95%+)
+                    </button>
+                    <button onclick="filterCases('risk')" id="case-btn-risk" class="case-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white">
+                        단기 착시 / 이탈위험형
+                    </button>
+                </div>
+            </div>
+
+            <!-- Case Studies Table -->
+            <div class="bg-cardbg border border-cardborder rounded-2xl overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs sm:text-sm">
+                        <thead class="bg-gray-900/90 text-gray-400 border-b border-gray-800 uppercase font-mono text-xs">
+                            <tr>
+                                <th class="py-3.5 px-4">구분 / 대학명</th>
+                                <th class="py-3.5 px-4">학과(전공)</th>
+                                <th class="py-3.5 px-4 text-right">단순 취업률</th>
+                                <th class="py-3.5 px-4 text-right">4차 유지취업률</th>
+                                <th class="py-3.5 px-4 text-center">고용 특성 & 비고</th>
+                            </tr>
+                        </thead>
+                        <tbody id="case-table-body" class="divide-y divide-gray-800/60 text-gray-200">
+                            <!-- JavaScript Populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chart Analytics Visualization Section -->
+        <section class="bg-cardbg border border-cardborder rounded-3xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-center justify-between border-b border-gray-800 pb-4">
+                <div>
+                    <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-chart-column text-accentcyan"></i> 대학 그룹별 취업 지표 종합 비교 시각화
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1">단순 취업률 vs 4차 유지취업률 간의 Gap 및 이탈 위험 수준 한눈에 확인</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Chart 1: Group Comparison -->
+                <div class="space-y-2">
+                    <div class="text-xs font-semibold text-gray-300">권역/설립유형별 취업률 vs 유지취업률</div>
+                    <div class="h-64 relative bg-gray-950/50 p-3 rounded-2xl border border-gray-800">
+                        <canvas id="overallBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Case Studies Scatter / Radar -->
+                <div class="space-y-2">
+                    <div class="text-xs font-semibold text-gray-300">주요 사례 학과별 단순 취업률 대비 유지율 매핑</div>
+                    <div class="h-64 relative bg-gray-950/50 p-3 rounded-2xl border border-gray-800">
+                        <canvas id="departmentScatterChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 border-t border-gray-800 bg-gray-950 py-8 text-center text-xs text-gray-500 space-y-2">
+        <div class="flex justify-center items-center space-x-4">
+            <a href="../index.html" class="text-accentcyan hover:underline inline-flex items-center gap-1">
+                <i class="fa-solid fa-house"></i> 메인 홈으로
+            </a>
+            <span>•</span>
+            <span>12개 대학 공학계열 3개년 공시 분석</span>
+        </div>
+        <p>© 2026 University Engineering Employment Quality Research Report. Dark Mode Interactive Edition.</p>
+    </footer>
+
+    <script>
+        // Data Structures
+        const matrixData = {
+            1: {
+                title: "[그룹 1] 수도권 국립 대학",
+                simple: "69.8%",
+                retention: "88.2%",
+                gap: "-18.4%p",
+                desc: "단순 취업률 69.8%로 수도권 사립대 대비 다소 낮으나, 유지취업률은 88.2% 수준을 유지합니다. 국립대 특유의 안정적 진로 선호(공공기관, 연구소) 경향이 관찰됩니다.",
+                badge: "수도권 국립"
+            },
+            2: {
+                title: "[그룹 2] 수도권 사립 대학",
+                simple: "78.5%",
+                retention: "93.6%",
+                gap: "-15.1%p",
+                desc: "단순 취업률(78.5%)과 유지취업률(93.6%) 모두 최고 수준입니다. 대기업 및 IT 스타트업 접근성이 뛰어나 초기 취업 인프라와 근속률 모두 우수합니다.",
+                badge: "수도권 사립"
+            },
+            3: {
+                title: "[그룹 3] 비수도권 국립 대학 (지거국)",
+                simple: "66.4%",
+                retention: "91.8%",
+                gap: "-25.4%p",
+                desc: "단순 취업률은 66.4%로 낮게 형성되나, 유지취업률은 91.8%로 수도권 국립대보다 높습니다! 혁신도시 이전 공공기관 할당제 및 지방 대기업 생산거점 산학연계의 강력한 방어력 입증.",
+                badge: "비수도권 국립 (핵심 방어)"
+            },
+            4: {
+                title: "[그룹 4] 비수도권 사립 대학",
+                simple: "62.1%",
+                retention: "85.9%",
+                gap: "-23.8%p",
+                desc: "단순 취업률(62.1%)과 유지취업률(85.9%) 모두 상대적으로 낮게 나타납니다. 지역 중소기업 및 현장 위주 취업 후 이직 및 이탈 비율이 높아 체질 개선이 필요합니다.",
+                badge: "비수도권 사립"
+            }
+        };
+
+        const caseStudies = [
+            // High Retention Group
+            {
+                type: 'high',
+                univ: '성균관대',
+                dept: '반도체시스템공학',
+                simple: 95.7,
+                retention: 97.8,
+                note: '대기업 채용 보장형 계약학과 (삼성전자 연계)',
+                badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            },
+            {
+                type: 'high',
+                univ: '아주대',
+                dept: '융합시스템공학',
+                simple: 97.7,
+                retention: 100.0,
+                note: '실무 중심의 높은 직무 일치도 (100% 완벽 유지)',
+                badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            },
+            {
+                type: 'high',
+                univ: '경북대',
+                dept: '모바일공학전공',
+                simple: 100.0,
+                retention: 100.0,
+                note: '지거국 내 최고 수준 고용 안정성 (100% 취업/유지)',
+                badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            },
+            {
+                type: 'high',
+                univ: '서울대',
+                dept: '컴퓨터공학부',
+                simple: 83.8,
+                retention: 96.8,
+                note: '최상위권 IT 인재의 높은 근속률 및 빅테크 진출',
+                badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            },
+            {
+                type: 'high',
+                univ: '한양대',
+                dept: '기계공학부',
+                simple: 78.6,
+                retention: 94.5,
+                note: '대형 제조사 및 연구소 위주의 안정적 고용',
+                badgeColor: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
+            },
+
+            // Risk / Short-term Group
+            {
+                type: 'risk',
+                univ: '동아대',
+                dept: '건축공학과',
+                simple: 78.8,
+                retention: 80.0,
+                note: '고용 유지 실패율 약 20% (현장 노동강도 영향)',
+                badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+            },
+            {
+                type: 'risk',
+                univ: '인천대',
+                dept: '전자공학과(야간)',
+                simple: 66.7,
+                retention: 87.5,
+                note: '주경야독형 근로자의 이탈 및 전직 빈번',
+                badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+            },
+            {
+                type: 'risk',
+                univ: '서울과기대',
+                dept: '도예학과(공학융합)',
+                simple: 64.9,
+                retention: 50.0,
+                note: '취업 직후 절반 퇴사 (유지율 50% 급감 특이 사례)',
+                badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+            },
+            {
+                type: 'risk',
+                univ: '울산대',
+                dept: '건설환경공학',
+                simple: 57.3,
+                retention: 75.0,
+                note: '건설 현장직 기피 및 이직 현상 뚜렷',
+                badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+            },
+            {
+                type: 'risk',
+                univ: '영남대',
+                dept: '파이버시스템공학',
+                simple: 55.3,
+                retention: 55.0,
+                note: '취업자 절반 가까이 1년 내 퇴사 (유지율 55%)',
+                badgeColor: 'bg-rose-500/10 text-rose-400 border-rose-500/30'
+            }
+        ];
+
+        let matrixChartInstance = null;
+        let overallChartInstance = null;
+        let scatterChartInstance = null;
+
+        // Initialize Page
+        window.onload = function() {
+            selectMatrixGroup(3); // Default highlight 지거국
+            renderCaseTable('all');
+            initCharts();
+            runSimulation();
+        };
+
+        // Scroll Helper
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if(el) {
+                el.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Matrix Selection Handler
+        function selectMatrixGroup(groupId) {
+            const data = matrixData[groupId];
+            
+            // Update Active Buttons
+            for(let i=1; i<=4; i++) {
+                const btn = document.getElementById(`btn-g${i}`);
+                if(i === groupId) {
+                    btn.className = "matrix-btn text-left p-4 rounded-xl border-2 border-accentcyan bg-accentcyan/10 transition relative group glow-cyan";
+                } else {
+                    btn.className = "matrix-btn text-left p-4 rounded-xl border border-gray-800 bg-gray-900/60 hover:border-gray-700 transition relative group";
+                }
+            }
+
+            // Update Detail Card
+            document.getElementById('matrix-detail-title').innerText = data.title;
+            document.getElementById('matrix-detail-body').innerHTML = `
+                <div class="flex items-center space-x-2">
+                    <span class="px-2 py-0.5 rounded text-xs font-bold bg-accentcyan/20 text-accentcyan border border-accentcyan/30">${data.badge}</span>
+                </div>
+                <div class="grid grid-cols-3 gap-2 bg-gray-950 p-3 rounded-xl border border-gray-800 my-2 text-center">
+                    <div>
+                        <div class="text-[10px] text-gray-400">단순 취업률</div>
+                        <div class="text-sm font-bold text-white">${data.simple}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400">유지 취업률</div>
+                        <div class="text-sm font-bold text-accentemerald">${data.retention}</div>
+                    </div>
+                    <div>
+                        <div class="text-[10px] text-gray-400">Gap (이탈)</div>
+                        <div class="text-sm font-bold text-accentamber">${data.gap}</div>
+                    </div>
+                </div>
+                <p class="text-gray-300 leading-relaxed">${data.desc}</p>
+            `;
+
+            updateMatrixMiniChart(groupId);
+        }
+
+        // Render Case Studies Table
+        function renderCaseTable(filter) {
+            const tbody = document.getElementById('case-table-body');
+            tbody.innerHTML = '';
+
+            const filteredData = caseStudies.filter(item => {
+                if(filter === 'all') return true;
+                return item.type === filter;
+            });
+
+            filteredData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-800/40 transition duration-150";
+
+                const isRisk = item.retention < 85 || item.type === 'risk';
+                const retentionClass = item.retention >= 95 ? 'text-accentemerald font-bold' : (isRisk ? 'text-accentrose font-bold' : 'text-gray-200');
+
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-semibold text-white">
+                        <span class="inline-block w-2 h-2 rounded-full ${item.type === 'high' ? 'bg-accentemerald' : 'bg-accentrose'} mr-2"></span>
+                        ${item.univ}
+                    </td>
+                    <td class="py-3.5 px-4 font-medium">${item.dept}</td>
+                    <td class="py-3.5 px-4 text-right font-mono">${item.simple.toFixed(1)}%</td>
+                    <td class="py-3.5 px-4 text-right font-mono ${retentionClass}">${item.retention.toFixed(1)}%</td>
+                    <td class="py-3.5 px-4 text-center">
+                        <span class="inline-block px-2.5 py-1 rounded-full text-xs border ${item.badgeColor}">
+                            ${item.note}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterCases(type) {
+            ['all', 'high', 'risk'].forEach(t => {
+                const btn = document.getElementById(`case-btn-${t}`);
+                if(t === type) {
+                    btn.className = "case-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-accentcyan/20 border border-accentcyan/40 font-bold";
+                } else {
+                    btn.className = "case-filter-btn px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 hover:text-white";
+                }
+            });
+            renderCaseTable(type);
+        }
+
+        // Simulation Engine for University Strategy
+        function runSimulation() {
+            const type = document.getElementById('sim-type').value;
+            const major = document.getElementById('sim-major').value;
+            const collab = document.getElementById('sim-collab').value;
+
+            let baseRetention = 85.0;
+            let baseSimple = 65.0;
+
+            if(type === 'g3') { baseRetention = 91.8; baseSimple = 66.4; }
+            else if(type === 'g1') { baseRetention = 88.2; baseSimple = 69.8; }
+            else if(type === 'g2') { baseRetention = 93.6; baseSimple = 78.5; }
+            else if(type === 'g4') { baseRetention = 85.9; baseSimple = 62.1; }
+
+            if(major === 'it_contract') { baseRetention += 5.5; baseSimple += 8.0; }
+            else if(major === 'traditional') { baseRetention -= 3.5; baseSimple -= 2.0; }
+
+            if(collab === 'high') { baseRetention += 3.0; }
+            else if(collab === 'low') { baseRetention -= 4.0; }
+
+            // Cap at 100
+            baseRetention = Math.min(100, Math.max(50, baseRetention));
+            baseSimple = Math.min(100, Math.max(40, baseSimple));
+
+            const realTurnover = (100 - baseRetention).toFixed(1);
+
+            let statusColor = "text-accentemerald";
+            let statusText = "고용 지속성 최우수 (이탈 위험 낮음)";
+            if(realTurnover > 15) {
+                statusColor = "text-accentrose";
+                statusText = "고용 이탈 경고 (1년 내 퇴사율 높음)";
+            } else if(realTurnover > 10) {
+                statusColor = "text-accentamber";
+                statusText = "중립적 고용 유지 (체질 개선 요구됨)";
+            }
+
+            const resultBox = document.getElementById('sim-result');
+            resultBox.innerHTML = `
+                <div class="space-y-1">
+                    <div class="text-xs text-gray-400">예측 4차 유지취업률 및 고용 위험도</div>
+                    <div class="text-xl font-extrabold ${statusColor} flex items-center gap-2">
+                        <span>예상 유지취업률: ${baseRetention.toFixed(1)}%</span>
+                        <span class="text-xs px-2 py-0.5 rounded border border-current font-normal">${statusText}</span>
+                    </div>
+                    <p class="text-xs text-gray-400">예상 1년 내 실질 이탈 비율: <strong>${realTurnover}%</strong> (예상 단순 취업률: ${baseSimple.toFixed(1)}%)</p>
+                </div>
+                <div class="text-xs bg-gray-800 p-3 rounded-xl border border-gray-700 text-gray-300 max-w-sm">
+                    <strong>💡 권장 정책:</strong> ${major === 'traditional' ? '현장 산학 연계 강화 및 이직 방지 케어 프로그램 도입 필요' : '대기업 계약학과 및 R&D 산학 네트워크 지속 확대 추천'}
+                </div>
+            `;
+        }
+
+        function initCharts() {
+            Chart.defaults.color = '#9CA3AF';
+            Chart.defaults.font.family = 'Inter, sans-serif';
+
+            // 1. Matrix Mini Chart
+            const ctxMatrix = document.getElementById('matrixChart').getContext('2d');
+            matrixChartInstance = new Chart(ctxMatrix, {
+                type: 'bar',
+                data: {
+                    labels: ['수도권 국립', '수도권 사립', '비수도권 국립', '비수도권 사립'],
+                    datasets: [
+                        {
+                            label: '단순 취업률(%)',
+                            data: [69.8, 78.5, 66.4, 62.1],
+                            backgroundColor: '#3B82F6',
+                            borderRadius: 6
+                        },
+                        {
+                            label: '4차 유지취업률(%)',
+                            data: [88.2, 93.6, 91.8, 85.9],
+                            backgroundColor: '#10B981',
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { boxWidth: 12, font: { size: 10 } } }
+                    },
+                    scales: {
+                        y: { min: 50, max: 100, grid: { color: '#1F2937' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 2. Overall Bar Chart
+            const ctxOverall = document.getElementById('overallBarChart').getContext('2d');
+            overallChartInstance = new Chart(ctxOverall, {
+                type: 'bar',
+                data: {
+                    labels: ['통합 평균', '수도권 국립', '수도권 사립', '비수도권 국립(지거국)', '비수도권 사립'],
+                    datasets: [
+                        {
+                            label: '단순 취업률',
+                            data: [71.2, 69.8, 78.5, 66.4, 62.1],
+                            backgroundColor: 'rgba(6, 182, 212, 0.7)',
+                            borderColor: '#06B6D4',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        },
+                        {
+                            label: '4차 유지취업률',
+                            data: [89.5, 88.2, 93.6, 91.8, 85.9],
+                            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                            borderColor: '#10B981',
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { size: 11 } } }
+                    },
+                    scales: {
+                        y: { min: 50, max: 100, grid: { color: '#1F2937' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 3. Department Scatter / Bubble Chart
+            const ctxScatter = document.getElementById('departmentScatterChart').getContext('2d');
+            scatterChartInstance = new Chart(ctxScatter, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: '고품질 유지형 학과',
+                            data: caseStudies.filter(c => c.type === 'high').map(c => ({ x: c.simple, y: c.retention, label: c.univ + ' ' + c.dept })),
+                            backgroundColor: '#10B981',
+                            pointRadius: 7,
+                            pointHoverRadius: 10
+                        },
+                        {
+                            label: '단기 착시/위험 학과',
+                            data: caseStudies.filter(c => c.type === 'risk').map(c => ({ x: c.simple, y: c.retention, label: c.univ + ' ' + c.dept })),
+                            backgroundColor: '#F43F5E',
+                            pointRadius: 7,
+                            pointHoverRadius: 10
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const raw = context.raw;
+                                    return `${raw.label}: 단순 ${raw.x}%, 유지 ${raw.y}%`;
+                                }
+                            }
+                        },
+                        legend: { position: 'top', labels: { font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: {
+                            title: { display: true, text: '단순 취업률 (%)', color: '#9CA3AF' },
+                            min: 50, max: 105,
+                            grid: { color: '#1F2937' }
+                        },
+                        y: {
+                            title: { display: true, text: '4차 유지취업률 (%)', color: '#9CA3AF' },
+                            min: 45, max: 105,
+                            grid: { color: '#1F2937' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateMatrixMiniChart(groupId) {
+            if(!matrixChartInstance) return;
+            // Highlight bar dynamically
+            const bgColorsSimple = ['#3B82F6', '#3B82F6', '#3B82F6', '#3B82F6'];
+            const bgColorsRetention = ['#10B981', '#10B981', '#10B981', '#10B981'];
+
+            bgColorsSimple[groupId - 1] = '#06B6D4';
+            bgColorsRetention[groupId - 1] = '#34D399';
+
+            matrixChartInstance.data.datasets[0].backgroundColor = bgColorsSimple;
+            matrixChartInstance.data.datasets[1].backgroundColor = bgColorsRetention;
+            matrixChartInstance.update();
+        }
+    </script>
+</body>
+</html>
