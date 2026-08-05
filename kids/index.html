@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko" class="scroll-smooth dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>전국 어린이 보호구역 안전 사각지대 탐색기 - PRD & 시스템 명세서</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Vector Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f5ff',
+                            100: '#e0ebff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        glow: {
+                            '0%': { boxShadow: '0 0 10px rgba(59, 130, 246, 0.2)' },
+                            '100%': { boxShadow: '0 0 20px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.2)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; }
+        
+        /* Custom Scrollbar for Dark Theme */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-300 antialiased selection:bg-blue-500 selection:text-white">
+
+    <!-- Header / Navigation -->
+    <header class="sticky top-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo & Title -->
+                <div class="flex items-center gap-4">
+                    <span class="p-2.5 bg-gradient-to-br from-red-500 to-rose-700 text-white rounded-xl shadow-lg shadow-red-900/50 transform hover:scale-110 transition-transform duration-300">
+                        <i class="fa-solid fa-shield-cat text-2xl"></i>
+                    </span>
+                    <div class="hidden sm:block">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-red-400 bg-red-400/10 px-2 py-0.5 rounded border border-red-500/20 mb-1 inline-block">PRD v2.1.0</span>
+                        <h1 class="text-xl font-bold text-white leading-none tracking-tight">어린이 보호구역 사각지대 탐색기</h1>
+                    </div>
+                </div>
+
+                <!-- Navigation Links -->
+                <nav class="hidden lg:flex space-x-6 text-sm font-medium text-slate-400">
+                    <a href="#overview" class="hover:text-blue-400 transition-colors">개요 & 스택</a>
+                    <a href="#scenarios" class="hover:text-blue-400 transition-colors">사용자 시나리오</a>
+                    <a href="#calculator" class="hover:text-blue-400 transition-colors">취약지수 엔진</a>
+                    <a href="#layout" class="hover:text-blue-400 transition-colors">대시보드 구조</a>
+                </nav>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center gap-3">
+                    <a href="../index.html" class="group flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all duration-300 text-sm font-medium text-slate-300 hover:text-white">
+                        <i class="fa-solid fa-house group-hover:-translate-y-0.5 transition-transform"></i>
+                        <span class="hidden sm:inline">홈</span>
+                    </a>
+                    <a href="https://dlehdrhksdlehdrhksdlehdrhks.github.io/AI2026_safeyzone/" target="_blank" class="group relative flex items-center gap-2 px-4 py-2 sm:px-5 sm:py-2 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-sm font-bold shadow-lg shadow-blue-900/50 transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
+                        <div class="absolute inset-0 w-full h-full bg-white/20 group-hover:animate-[ping_1.5s_ease-in-out_infinite] opacity-0 group-hover:opacity-100 rounded-lg"></div>
+                        <i class="fa-solid fa-rocket group-hover:text-amber-300 transition-colors z-10"></i>
+                        <span class="z-10">구현 앱</span>
+                    </a>
+                    <span class="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-900/40 text-emerald-400 border border-emerald-800/50 ml-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        Approved
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative bg-slate-950 py-20 px-4 sm:px-6 lg:px-8 overflow-hidden border-b border-slate-800/60">
+        <!-- Background Orbs -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none"></div>
+        <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+        
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#475569_1px,transparent_1px)] [background-size:24px_24px]"></div>
+        
+        <div class="max-w-7xl mx-auto relative z-10 text-center sm:text-left flex flex-col sm:flex-row items-center justify-between gap-12">
+            <div class="flex-1 space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-medium backdrop-blur-sm animate-glow">
+                    <i class="fa-solid fa-code"></i> Pure Vanilla JS (ES6+) Architecture
+                </div>
+                <h2 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-white">
+                    전국 <span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-rose-500">14,640개 스쿨존</span>의<br/>
+                    안전 데이터를 시각화하다.
+                </h2>
+                <p class="text-slate-400 text-base sm:text-lg max-w-2xl font-normal leading-relaxed">
+                    공공데이터(<code class="bg-slate-800 px-2 py-0.5 rounded text-amber-300 text-sm border border-slate-700">전국어린이보호구역.csv</code>) 기반으로 CCTV 미설치 구역과 취약 지수를 통합 분석하여, 지자체 정책 수립부터 학부모 정보 제공까지 완결형 반응형 대시보드로 제공합니다.
+                </p>
+            </div>
+
+            <!-- Hero Stats Grid -->
+            <div class="grid grid-cols-2 gap-4 w-full sm:w-auto animate-float">
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700/50 backdrop-blur-md shadow-xl hover:border-blue-500/50 transition-colors group">
+                    <div class="text-slate-500 text-xs font-semibold mb-1 group-hover:text-slate-400 transition-colors">분석 대상 레코드</div>
+                    <div class="text-3xl font-black text-white">~14.6k</div>
+                    <div class="text-[11px] text-emerald-400 mt-2 flex items-center gap-1"><i class="fa-solid fa-bolt"></i> 초고속 브라우저 렌더링</div>
+                </div>
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700/50 backdrop-blur-md shadow-xl hover:border-amber-500/50 transition-colors group">
+                    <div class="text-slate-500 text-xs font-semibold mb-1 group-hover:text-slate-400 transition-colors">핵심 구동 방식</div>
+                    <div class="text-3xl font-black text-amber-400">Vanilla</div>
+                    <div class="text-[11px] text-slate-400 mt-2">Zero-Dependency 실행</div>
+                </div>
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700/50 backdrop-blur-md shadow-xl hover:border-rose-500/50 transition-colors group">
+                    <div class="text-slate-500 text-xs font-semibold mb-1 group-hover:text-slate-400 transition-colors">평가 체계</div>
+                    <div class="text-3xl font-black text-rose-400">5 Grades</div>
+                    <div class="text-[11px] text-slate-400 mt-2">S, A, B, D, F 등급 자동화</div>
+                </div>
+                <div class="bg-slate-900/80 p-5 rounded-2xl border border-slate-700/50 backdrop-blur-md shadow-xl hover:border-indigo-500/50 transition-colors group">
+                    <div class="text-slate-500 text-xs font-semibold mb-1 group-hover:text-slate-400 transition-colors">공간 분석</div>
+                    <div class="text-3xl font-black text-indigo-400">2D Map</div>
+                    <div class="text-[11px] text-slate-400 mt-2">API 없는 Scatter 시각화</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-24">
+
+        <!-- 1. 프로젝트 개요 & 바닐라 JS 채택 이유 -->
+        <section id="overview" class="scroll-mt-24 group">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-1.5 h-8 bg-blue-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">1. 프로젝트 개요 & 아키텍처</h3>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-lg hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:border-slate-600 hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-900/30 text-blue-400 flex items-center justify-center text-2xl font-bold mb-6 border border-blue-500/20 shadow-[inset_0_0_15px_rgba(59,130,246,0.1)]">
+                        <i class="fa-solid fa-feather"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">Zero-Dependency & 경량화</h4>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        React, Vue 등 무거운 프레임워크와 Node/NPM 빌드 과정 없이, 오직 브라우저 표준 기술(ES6+)로 100% 실행 가능한 극도로 경량화된 단일 파일 구조를 채택했습니다.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-lg hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:border-slate-600 hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-900/30 text-amber-400 flex items-center justify-center text-2xl font-bold mb-6 border border-amber-500/20 shadow-[inset_0_0_15px_rgba(251,191,36,0.1)]">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">초고속 1.4만건 연산 엔진</h4>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        Virtual DOM 오버헤드가 없으므로 <code class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">filter()</code> 등 순수 JS 메모리 연산과 네이티브 렌더링을 통해 1초 이내에 방대한 데이터의 검색/필터링을 완료합니다.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-lg hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] hover:border-slate-600 hover:-translate-y-2 transition-all duration-300">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-900/30 text-emerald-400 flex items-center justify-center text-2xl font-bold mb-6 border border-emerald-500/20 shadow-[inset_0_0_15px_rgba(16,185,129,0.1)]">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-3">완벽한 폐쇄망 호환성</h4>
+                    <p class="text-sm text-slate-400 leading-relaxed">
+                        공공기관 내부망, 보안 통제 구역 등 복잡한 서버/빌드 환경 구축이 불가능한 로컬 환경에서도 단일 <code class="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded border border-slate-700">index.html</code> 파일 하나로 즉시 실행됩니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 타겟 사용자 및 활용 시나리오 -->
+        <section id="scenarios" class="scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-1.5 h-8 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.8)]"></div>
+                <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">2. 타겟 사용자 페르소나 및 시나리오</h3>
+            </div>
+
+            <div class="bg-slate-900 rounded-3xl border border-slate-800 shadow-xl overflow-hidden divide-y divide-slate-800 lg:divide-y-0 lg:divide-x lg:flex">
+                
+                <!-- Scenario 1 -->
+                <div class="flex-1 p-8 lg:p-10 hover:bg-slate-800/50 transition-colors duration-300">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-900/40 text-blue-400 text-xs font-bold mb-5 border border-blue-800">
+                        <i class="fa-solid fa-building-user"></i> 지자체 & 경찰서 담당자
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-4">안전 예산 집행 우선순위 수립</h4>
+                    <ul class="text-sm text-slate-400 space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-blue-500 mt-0.5 text-xs"></i>
+                            <span>관할 구역 내 <strong>F등급(고위험) 사각지대</strong>를 즉각적으로 모니터링 및 원클릭 필터링.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-blue-500 mt-0.5 text-xs"></i>
+                            <span class="text-slate-300 bg-slate-800 px-1 rounded">정책 보고서 브리핑 문장 자동 생성</span> 기능을 활용해 공문 첨부용 초안을 즉시 확보.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Scenario 2 -->
+                <div class="flex-1 p-8 lg:p-10 hover:bg-slate-800/50 transition-colors duration-300">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-900/40 text-emerald-400 text-xs font-bold mb-5 border border-emerald-800">
+                        <i class="fa-solid fa-child-reaching"></i> 학부모 & 교육자
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-4">실제 통학로 안전성 직관적 확인</h4>
+                    <ul class="text-sm text-slate-400 space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5 text-xs"></i>
+                            <span>자녀가 다니는 초등학교/어린이집을 검색하여 배정된 CCTV 설치 대수를 직접 확인.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-emerald-500 mt-0.5 text-xs"></i>
+                            <span>해당 구역의 <strong>안전 취약 지수(0~100점)</strong> 및 5단계 등급을 통해 인프라 취약성을 체감.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Scenario 3 -->
+                <div class="flex-1 p-8 lg:p-10 hover:bg-slate-800/50 transition-colors duration-300">
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-purple-900/40 text-purple-400 text-xs font-bold mb-5 border border-purple-800">
+                        <i class="fa-solid fa-chart-pie"></i> 공공데이터 분석가
+                    </div>
+                    <h4 class="text-xl font-bold text-white mb-4">공간 데이터 분석 및 추출</h4>
+                    <ul class="text-sm text-slate-400 space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-purple-500 mt-0.5 text-xs"></i>
+                            <span>무거운 지도 API 없이 <strong>2D 위경도 산점도(Scatter)</strong>를 통해 지역별 밀집 편차를 시각적 분석.</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-check text-purple-500 mt-0.5 text-xs"></i>
+                            <span>조건부 필터링된 결과 데이터를 <strong>UTF-8 BOM CSV</strong> 형식으로 내보내어 엑셀 연동.</span>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. 안전 취약 지수 알고리즘 및 시뮬레이터 -->
+        <section id="calculator" class="scroll-mt-24">
+            <div class="flex items-center justify-between gap-4 mb-8">
+                <div class="flex items-center gap-4">
+                    <div class="w-1.5 h-8 bg-rose-500 rounded-full shadow-[0_0_10px_rgba(244,63,94,0.8)]"></div>
+                    <div>
+                        <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">3. 핵심 엔진: 안전 취약 지수 (Vulnerability Score)</h3>
+                        <p class="text-sm text-slate-400 mt-1">PRD 4.1절 가중치 산식 연산 알고리즘 및 실시간 인터랙티브 체험 시뮬레이터</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-900 rounded-3xl shadow-xl overflow-hidden border border-slate-800">
+                <!-- Math Formula Display -->
+                <div class="bg-slate-950 p-8 border-b border-slate-800 relative overflow-hidden">
+                    <div class="absolute -right-10 -top-10 text-9xl text-slate-800/30 font-serif rotate-12 pointer-events-none">∑</div>
+                    <div class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 relative z-10">알고리즘 산식 (Formula)</div>
+                    <div class="text-lg sm:text-2xl font-mono text-amber-400 relative z-10 overflow-x-auto whitespace-nowrap pb-2">
+                        Score = min(100, S<sub class="text-xs">cctv</sub> + W<sub class="text-xs">facility</sub> + W<sub class="text-xs">road</sub>)
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 pt-6 border-t border-slate-800 text-sm text-slate-400 relative z-10">
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                            <span class="text-rose-400 font-bold block mb-2">1. CCTV 설치 점수 (S)</span>
+                            <ul class="space-y-1 text-xs">
+                                <li>• 0대 (미설치): +50점</li>
+                                <li>• 1대 설치: +30점</li>
+                                <li>• 2대 설치: +15점</li>
+                                <li>• 3대 이상: +0점</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                            <span class="text-amber-400 font-bold block mb-2">2. 시설 가중치 (W1)</span>
+                            <ul class="space-y-1 text-xs">
+                                <li>• 어린이집/유치원: +25점</li>
+                                <li>• 초등학교/특수: +15점</li>
+                                <li>• 기타(학원 등): +10점</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+                            <span class="text-blue-400 font-bold block mb-2">3. 도로폭 가중치 (W2)</span>
+                            <ul class="space-y-1 text-xs">
+                                <li>• 6m 미만 (협소): +25점</li>
+                                <li>• 6m ~ 12m: +15점</li>
+                                <li>• 12m 이상: +5점</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Score Simulator -->
+                <div class="p-8 sm:p-10">
+                    <h4 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                        <span class="relative flex h-3 w-3 mr-1">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                        </span>
+                        파라미터 조작 시뮬레이터 (직접 조작해 보세요)
+                    </h4>
+
+                    <div class="grid lg:grid-cols-12 gap-10 items-center">
+                        <!-- Controls (7 cols) -->
+                        <div class="lg:col-span-7 space-y-8">
+                            <!-- CCTV Count -->
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-bold text-slate-300 mb-3">
+                                    <label for="sim-cctv">CCTV 설치 대수</label>
+                                    <span id="sim-cctv-val" class="text-blue-400 font-mono bg-blue-900/30 px-2 py-0.5 rounded">0대 (미설치)</span>
+                                </div>
+                                <input type="range" id="sim-cctv" min="0" max="5" value="0" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500 hover:accent-blue-400 transition-all">
+                            </div>
+
+                            <!-- Facility Type -->
+                            <div>
+                                <label class="block text-sm font-bold text-slate-300 mb-3">시설 종류</label>
+                                <select id="sim-facility" class="w-full text-sm font-medium border border-slate-700 rounded-xl p-3.5 bg-slate-800 text-white focus:bg-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all cursor-pointer">
+                                    <option value="어린이집">어린이집 (+25점, 영유아 돌발 위험 높음)</option>
+                                    <option value="유치원">유치원 (+25점, 영유아 돌발 위험 높음)</option>
+                                    <option value="초등학교" selected>초등학교 (+15점, 주 이동 통로)</option>
+                                    <option value="특수학교">특수학교 (+15점)</option>
+                                    <option value="기타">기타 외국인/학원 등 (+10점)</option>
+                                </select>
+                            </div>
+
+                            <!-- Road Width -->
+                            <div class="group">
+                                <div class="flex justify-between text-sm font-bold text-slate-300 mb-3">
+                                    <label for="sim-width">보호구역 내 도로 폭 (m)</label>
+                                    <span id="sim-width-val" class="text-emerald-400 font-mono bg-emerald-900/30 px-2 py-0.5 rounded">5m (협소 도로)</span>
+                                </div>
+                                <input type="range" id="sim-width" min="0" max="20" value="5" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400 transition-all">
+                                <div class="flex justify-between text-[10px] text-slate-500 mt-2 font-mono">
+                                    <span>0m</span>
+                                    <span>6m 기준</span>
+                                    <span>12m 기준</span>
+                                    <span>20m</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Output Score Card (5 cols) -->
+                        <div class="lg:col-span-5 bg-slate-800/80 p-8 rounded-3xl border border-slate-700 text-center flex flex-col items-center justify-center relative overflow-hidden shadow-inner h-full transition-colors duration-500" id="sim-output-card">
+                            <!-- Background decorative glow -->
+                            <div id="sim-glow" class="absolute inset-0 opacity-20 transition-all duration-500 bg-gradient-to-t from-red-600/40 to-transparent"></div>
+                            
+                            <div class="relative z-10 w-full">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-4">계산된 종합 취약 지수</span>
+                                <div id="sim-score-display" class="text-7xl font-black text-rose-500 font-mono tracking-tighter my-2 drop-shadow-[0_0_15px_rgba(244,63,94,0.5)]">
+                                    80<span class="text-3xl text-rose-500/50">점</span>
+                                </div>
+                                <div id="sim-grade-badge" class="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] animate-pulse">
+                                    🚨 F등급 (고위험 사각지대)
+                                </div>
+                                <div class="mt-6 p-4 bg-slate-900/80 rounded-xl border border-slate-700/50 text-left">
+                                    <p id="sim-desc" class="text-sm text-slate-300 leading-relaxed font-medium">
+                                        CCTV가 설치되지 않고 협소한 도로망을 가진 구역으로, 우선 예산 배정이 시급합니다.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 실제 대시보드 UI 레이아웃 프리뷰 -->
+        <section id="layout" class="scroll-mt-24">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-1.5 h-8 bg-amber-500 rounded-full shadow-[0_0_10px_rgba(245,158,11,0.8)]"></div>
+                <div>
+                    <h3 class="text-2xl sm:text-3xl font-bold text-white tracking-tight">4. 대시보드 UI 프리뷰 (Wireframe)</h3>
+                    <p class="text-sm text-slate-400 mt-1">실제 구현될 화면의 구성 요소 배치 및 차트 렌더링 예시</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Mock Wireframe Container -->
+            <div class="bg-slate-950 p-4 sm:p-6 rounded-3xl border-2 border-slate-800 shadow-[0_0_40px_rgba(0,0,0,0.5)] space-y-5 relative">
+                
+                <!-- Browser-like header for mockup -->
+                <div class="absolute top-0 left-0 w-full h-8 bg-slate-900 border-b border-slate-800 rounded-t-3xl flex items-center px-4 gap-2">
+                    <div class="w-3 h-3 rounded-full bg-slate-700"></div>
+                    <div class="w-3 h-3 rounded-full bg-slate-700"></div>
+                    <div class="w-3 h-3 rounded-full bg-slate-700"></div>
+                    <div class="mx-auto text-[10px] text-slate-500 font-mono bg-slate-800 px-3 py-0.5 rounded">Dashboard Viewport</div>
+                </div>
+
+                <div class="pt-6"></div> <!-- Spacer for mockup header -->
+
+                <!-- Header / File Loader Mock -->
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-wrap items-center justify-between gap-4 shadow-sm hover:border-slate-700 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <span class="p-2 bg-gradient-to-br from-blue-600 to-indigo-700 text-white rounded-lg shadow-lg"><i class="fa-solid fa-shield"></i></span>
+                        <span class="font-bold text-base text-white">어린이 보호구역 대시보드</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs">
+                        <span class="bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-slate-400 font-mono"><i class="fa-solid fa-file-csv mr-1"></i> data_standard.csv</span>
+                        <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg font-bold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> 14,640 Ready
+                        </span>
+                    </div>
+                </div>
+
+                <!-- KPI Cards (4) -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm hover:-translate-y-1 hover:border-blue-500/30 transition-all cursor-pointer group">
+                        <div class="text-[11px] font-bold text-slate-400 group-hover:text-blue-400 transition-colors">전체 보호구역 (Total)</div>
+                        <div class="text-2xl font-black text-white mt-2">14,640<span class="text-sm font-medium text-slate-500 ml-1">개</span></div>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm hover:-translate-y-1 hover:border-rose-500/30 transition-all cursor-pointer group">
+                        <div class="text-[11px] font-bold text-rose-500 flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-500"></span> CCTV 미설치</div>
+                        <div class="text-2xl font-black text-white mt-2">1,892<span class="text-sm font-medium text-slate-500 ml-1">개</span></div>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm hover:-translate-y-1 hover:border-amber-500/30 transition-all cursor-pointer group">
+                        <div class="text-[11px] font-bold text-amber-500 flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> 미설치 비율</div>
+                        <div class="text-2xl font-black text-white mt-2">12.9<span class="text-sm font-medium text-slate-500 ml-1">%</span></div>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm hover:-translate-y-1 hover:border-red-500/50 hover:shadow-[0_0_15px_rgba(220,38,38,0.2)] transition-all cursor-pointer group">
+                        <div class="text-[11px] font-bold text-red-500 flex items-center gap-1"><i class="fa-solid fa-siren-on animate-pulse"></i> F등급 (고위험)</div>
+                        <div class="text-2xl font-black text-red-400 mt-2">421<span class="text-sm font-medium text-red-500/50 ml-1">개</span></div>
+                    </div>
+                </div>
+
+                <!-- Filter & Policy Brief Box -->
+                <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 shadow-sm space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                        <div class="flex flex-wrap gap-2 text-xs font-medium">
+                            <span class="px-3 py-1.5 bg-blue-600 text-white rounded-lg cursor-pointer shadow-[0_0_10px_rgba(37,99,235,0.4)]">전체 보기</span>
+                            <span class="px-3 py-1.5 bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">🔴 미설치 구역</span>
+                            <span class="px-3 py-1.5 bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700 rounded-lg cursor-pointer transition-colors">🚨 F등급 전용</span>
+                        </div>
+                        <button class="text-xs bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg font-bold flex items-center gap-2 transition-colors">
+                            <i class="fa-solid fa-file-excel"></i> CSV Export
+                        </button>
+                    </div>
+
+                    <!-- Auto Generated Policy Brief Sentence -->
+                    <div class="p-4 bg-blue-900/20 border border-blue-500/30 rounded-xl flex items-start justify-between gap-4">
+                        <div>
+                            <span class="text-xs font-bold text-blue-400 flex items-center gap-1.5 mb-1.5">
+                                <i class="fa-solid fa-robot"></i> AI 원클릭 정책 브리핑
+                            </span>
+                            <p class="text-sm text-slate-300 leading-relaxed font-serif">"현재 분석 대상 14,640개 보호구역 중 CCTV 미설치 구역은 총 1,892개소(12.9%)이며, 시급한 개선이 요구되는 F등급 고위험 사각지대는 421개소입니다."</p>
+                        </div>
+                        <button class="shrink-0 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy"></i> 복사
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Visual Charts (3) -->
+                <div class="grid lg:grid-cols-3 gap-5">
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                        <div class="text-xs font-bold text-slate-400 mb-3">경찰서별 미설치 TOP 5</div>
+                        <div class="h-48 relative"><canvas id="preview-bar-chart"></canvas></div>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800">
+                        <div class="text-xs font-bold text-slate-400 mb-3">시설종류 비중</div>
+                        <div class="h-48 relative"><canvas id="preview-doughnut-chart"></canvas></div>
+                    </div>
+                    <div class="bg-slate-900 p-5 rounded-2xl border border-slate-800 group relative overflow-hidden">
+                        <div class="text-xs font-bold text-slate-400 mb-3 flex justify-between">
+                            <span>2D 공간 분포도</span>
+                            <span class="text-[10px] text-blue-400 bg-blue-900/30 px-1.5 rounded">API Free</span>
+                        </div>
+                        <div class="h-48 relative z-10"><canvas id="preview-scatter-chart"></canvas></div>
+                        <!-- Decorative map background glow -->
+                        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPjxyZWN0IHdpZHRoPSI0IiBoZWlnaHQ9IjQiIGZpbGw9IiMwZjE3MmEiLz48cmVjdCB3aWR0aD0iMSIgaGVpZ2h0PSIxIiBmaWxsPSIjMzM0MTU1Ii8+PC9zdmc+')] opacity-20 z-0"></div>
+                    </div>
+                </div>
+
+                <!-- Table Mockup -->
+                <div class="bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden text-sm">
+                    <div class="p-4 bg-slate-900/80 border-b border-slate-800 flex justify-between items-center">
+                        <span class="font-bold text-white text-xs">데이터 브라우저 <span class="text-slate-500 font-normal ml-2">목록 1-10</span></span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-950 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                                    <th class="p-3 font-medium">대상시설명</th>
+                                    <th class="p-3 font-medium">CCTV 여부</th>
+                                    <th class="p-3 font-medium">도로폭</th>
+                                    <th class="p-3 font-medium">위험도 점수</th>
+                                    <th class="p-3 font-medium">등급</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800/50 text-slate-300">
+                                <tr class="hover:bg-slate-800/80 transition-colors cursor-pointer group">
+                                    <td class="p-3 font-bold group-hover:text-white">햇살어린이집</td>
+                                    <td class="p-3"><span class="text-rose-400 font-bold bg-rose-500/10 px-2 py-0.5 rounded">N (0대)</span></td>
+                                    <td class="p-3">4.5m</td>
+                                    <td class="p-3 font-mono font-bold text-rose-400">100점</td>
+                                    <td class="p-3"><span class="px-2 py-1 rounded-md bg-rose-500/20 text-rose-400 text-xs font-extrabold border border-rose-500/30">F 등급</span></td>
+                                </tr>
+                                <tr class="hover:bg-slate-800/80 transition-colors cursor-pointer group">
+                                    <td class="p-3 font-bold group-hover:text-white">중앙초등학교</td>
+                                    <td class="p-3"><span class="text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">Y (4대)</span></td>
+                                    <td class="p-3">12m</td>
+                                    <td class="p-3 font-mono font-bold text-emerald-400">20점</td>
+                                    <td class="p-3"><span class="px-2 py-1 rounded-md bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">S 등급</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-10 text-center text-sm text-slate-500">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-slate-900 border border-slate-800 mb-4 hover:bg-slate-800 transition-colors cursor-pointer" onclick="window.scrollTo({top:0})">
+                <i class="fa-solid fa-arrow-up text-slate-400"></i>
+            </div>
+            <p>전국 어린이 보호구역 안전 사각지대 탐색기 PRD v2.1.0 Interactive Spec Showcase</p>
+            <p class="mt-2 text-slate-600 font-mono text-xs">Developed with Pure Vanilla JavaScript (ES6+)</p>
+        </div>
+    </footer>
+
+    <script>
+        // Set Chart.js Defaults for Dark Mode
+        Chart.defaults.color = '#94a3b8'; // text-slate-400
+        Chart.defaults.font.family = "'Pretendard', sans-serif";
+
+        // 1. Simulator Logic
+        const simCctv = document.getElementById('sim-cctv');
+        const simCctvVal = document.getElementById('sim-cctv-val');
+        const simFacility = document.getElementById('sim-facility');
+        const simWidth = document.getElementById('sim-width');
+        const simWidthVal = document.getElementById('sim-width-val');
+
+        const simOutputCard = document.getElementById('sim-output-card');
+        const simGlow = document.getElementById('sim-glow');
+        const simScoreDisplay = document.getElementById('sim-score-display');
+        const simGradeBadge = document.getElementById('sim-grade-badge');
+        const simDesc = document.getElementById('sim-desc');
+
+        function updateSimulation() {
+            const cctv = parseInt(simCctv.value);
+            const facility = simFacility.value;
+            const width = parseFloat(simWidth.value);
+
+            // Display values dynamically
+            simCctvVal.textContent = cctv === 0 ? '0대 (미설치)' : `${cctv}대`;
+            simWidthVal.textContent = width === 0 ? '0m (정보없음)' : `${width}m`;
+
+            // Core Logic PRD 4.1
+            let score = 0;
+            if (cctv === 0) score += 50;
+            else if (cctv === 1) score += 30;
+            else if (cctv === 2) score += 15;
+
+            if (facility.includes('어린이집') || facility.includes('유치원')) score += 25;
+            else if (facility.includes('초등학교') || facility.includes('특수학교')) score += 15;
+            else score += 10;
+
+            if (width < 6) score += 25;
+            else if (width >= 6 && width < 12) score += 15;
+            else score += 5;
+
+            const finalScore = Math.min(100, score);
+            
+            // Animation reset trick
+            simScoreDisplay.style.transform = 'scale(1.1)';
+            setTimeout(() => simScoreDisplay.style.transform = 'scale(1)', 150);
+
+            // Output Rendering & Dark Mode Theme switching per grade
+            if (finalScore >= 80) {
+                simScoreDisplay.innerHTML = `${finalScore}<span class="text-3xl text-rose-500/50">점</span>`;
+                simScoreDisplay.className = "text-7xl font-black text-rose-500 font-mono tracking-tighter my-2 drop-shadow-[0_0_15px_rgba(244,63,94,0.5)] transition-all duration-300";
+                simGradeBadge.className = "mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-extrabold bg-rose-500/20 text-rose-400 border border-rose-500/50 shadow-[0_0_15px_rgba(244,63,94,0.3)] animate-pulse";
+                simGradeBadge.innerHTML = "🚨 F등급 (고위험 사각지대)";
+                simDesc.textContent = "CCTV 인프라가 없고 보행로가 협소하여 사고 위험이 극심합니다. 우선 예산 배정이 필수적입니다.";
+                simOutputCard.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+                simGlow.className = "absolute inset-0 opacity-20 transition-all duration-500 bg-gradient-to-t from-rose-600/40 to-transparent";
+            } else if (finalScore >= 60) {
+                simScoreDisplay.innerHTML = `${finalScore}<span class="text-3xl text-amber-500/50">점</span>`;
+                simScoreDisplay.className = "text-7xl font-black text-amber-400 font-mono tracking-tighter my-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.5)] transition-all duration-300";
+                simGradeBadge.className = "mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-extrabold bg-amber-500/20 text-amber-400 border border-amber-500/50 shadow-[0_0_15px_rgba(251,191,36,0.3)]";
+                simGradeBadge.innerHTML = "🟡 D등급 (경고 구역)";
+                simDesc.textContent = "CCTV 추가 설치 및 도로 폭 확장이 권장되는 관리 주의 구역입니다.";
+                simOutputCard.style.borderColor = 'rgba(251, 191, 36, 0.4)';
+                simGlow.className = "absolute inset-0 opacity-20 transition-all duration-500 bg-gradient-to-t from-amber-600/40 to-transparent";
+            } else if (finalScore >= 40) {
+                simScoreDisplay.innerHTML = `${finalScore}<span class="text-3xl text-indigo-500/50">점</span>`;
+                simScoreDisplay.className = "text-7xl font-black text-indigo-400 font-mono tracking-tighter my-2 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] transition-all duration-300";
+                simGradeBadge.className = "mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/50";
+                simGradeBadge.innerHTML = "🟣 B등급 (보통 주의)";
+                simDesc.textContent = "기본적인 안전 인프라가 구성되어 있으나 정기적인 시설 점검이 요구됩니다.";
+                simOutputCard.style.borderColor = 'rgba(99, 102, 241, 0.4)';
+                simGlow.className = "absolute inset-0 opacity-20 transition-all duration-500 bg-gradient-to-t from-indigo-600/40 to-transparent";
+            } else if (finalScore >= 20) {
+                simScoreDisplay.innerHTML = `${finalScore}<span class="text-3xl text-blue-500/50">점</span>`;
+                simScoreDisplay.className = "text-7xl font-black text-blue-400 font-mono tracking-tighter my-2 drop-shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all duration-300";
+                simGradeBadge.className = "mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold bg-blue-500/20 text-blue-400 border border-blue-500/50";
+                simGradeBadge.innerHTML = "🔵 A등급 (양호)";
+                simDesc.textContent = "보행 환경이 적절히 확보되어 있으며 안전 위험이 낮은 상태입니다.";
+                simOutputCard.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                simGlow.className = "absolute inset-0 opacity-20 transition-all duration-500 bg-gradient-to-t from-blue-600/40 to-transparent";
+            } else {
+                simScoreDisplay.innerHTML = `${finalScore}<span class="text-3xl text-emerald-500/50">점</span>`;
+                simScoreDisplay.className = "text-7xl font-black text-emerald-400 font-mono tracking-tighter my-2 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-300";
+                simGradeBadge.className = "mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/50";
+                simGradeBadge.innerHTML = "🟢 S등급 (최상 안심)";
+                simDesc.textContent = "CCTV 수량 및 보행로 도로폭이 매우 쾌적하게 확보된 우수 안전 보호구역입니다.";
+                simOutputCard.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+                simGlow.className = "absolute inset-0 opacity-20 transition-all duration-500 bg-gradient-to-t from-emerald-600/40 to-transparent";
+            }
+        }
+
+        ['input', 'change'].forEach(evt => {
+            simCctv.addEventListener(evt, updateSimulation);
+            simFacility.addEventListener(evt, updateSimulation);
+            simWidth.addEventListener(evt, updateSimulation);
+        });
+        updateSimulation();
+
+        // 2. Render Mock Charts (Dark Theme Configured)
+        window.addEventListener('DOMContentLoaded', () => {
+            const commonOptions = {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { 
+                    y: { grid: { color: 'rgba(51, 65, 85, 0.5)' }, border: { dash: [4, 4] }, ticks: { font: { size: 10 } } }, 
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } } 
+                }
+            };
+
+            // Bar Chart
+            new Chart(document.getElementById('preview-bar-chart'), {
+                type: 'bar',
+                data: {
+                    labels: ['경찰서A', '경찰서B', '경찰서C', '경찰서D', '경찰서E'],
+                    datasets: [{
+                        data: [42, 35, 29, 24, 18],
+                        backgroundColor: 'rgba(244, 63, 94, 0.8)', // rose-500
+                        borderRadius: 4
+                    }]
+                },
+                options: commonOptions
+            });
+
+            // Doughnut Chart
+            new Chart(document.getElementById('preview-doughnut-chart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['어린이집', '유치원', '초등학교', '기타'],
+                    datasets: [{
+                        data: [45, 30, 15, 10],
+                        backgroundColor: ['#f59e0b', '#ec4899', '#3b82f6', '#475569'],
+                        borderColor: '#0f172a', borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 }, color: '#cbd5e1' } } },
+                    cutout: '70%'
+                }
+            });
+
+            // Scatter Chart 
+            const randomScatter = (count, latBase, lngBase) => {
+                return Array.from({length: count}, () => ({
+                    x: lngBase + (Math.random() - 0.5) * 4,
+                    y: latBase + (Math.random() - 0.5) * 4
+                }));
+            };
+
+            new Chart(document.getElementById('preview-scatter-chart'), {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        { label: '미설치(F)', data: randomScatter(30, 36.5, 127.8), backgroundColor: 'rgba(244, 63, 94, 0.9)', pointRadius: 4 },
+                        { label: '설치(S)', data: randomScatter(70, 36.5, 127.8), backgroundColor: 'rgba(16, 185, 129, 0.5)', pointRadius: 3 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false, min: 125, max: 130 },
+                        y: { display: false, min: 34, max: 39 }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
