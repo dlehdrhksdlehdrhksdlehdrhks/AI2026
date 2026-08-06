@@ -378,8 +378,8 @@
             </div>
 
             <!-- Card 7: 공공데이터 앱 -->
-            <div class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group"
-                 data-category="app" data-keywords="공공데이터 앱 API 미세먼지 환경 실시간 대시보드" onclick="openModal(7)">
+            <a href="./openapi/index.html" class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group"
+                 data-category="app" data-keywords="공공데이터 앱 API 부산축제가이드 부산광역시 사계절축제 지도달력">
                 <div>
                     <div class="flex items-center justify-between mb-4">
                         <span class="px-3 py-1 rounded-lg text-xs font-semibold bg-ai-emerald/20 text-ai-emerald border border-ai-emerald/30">
@@ -390,22 +390,22 @@
                         </div>
                     </div>
                     <h3 class="text-xl font-bold mb-2 group-hover:text-ai-emerald transition-colors">공공데이터 앱</h3>
-                    <p class="text-slate-400 text-sm line-clamp-3 leading-relaxed mb-4">
-                        공공데이터 포털 Open API 연동. 학교 주변 실시간 미세먼지 측정치 및 야외 체육 활동 위험 지수를 자동 산출하는 라이브 대시보드.
+                    <p class="text-slate-400 text-sm line-clamp-2 leading-relaxed mb-4">
+                        공공데이터포털 Open API를 연동하여 부산 16개 구·군의 사계절 축제 및 문화 행사 정보를 실시간으로 조회하고 지도·달력으로 손쉽게 탐색하는 웹 서비스.
                     </p>
                 </div>
                 <div>
                     <div class="flex flex-wrap gap-1.5 mb-4">
                         <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#공공데이터포털</span>
                         <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#API연동</span>
-                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#미세먼지예보</span>
+                        <span class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">#부산축제가이드</span>
                     </div>
                     <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-ai-emerald font-semibold group-hover:translate-x-1 transition-transform">
-                        <span>API 연동 결과 및 구동 화면</span>
+                        <span>부산 축제 가이드 웹앱 바로가기</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </div>
                 </div>
-            </div>
+            </a>
 
             <!-- Card 8: 최종 성찰 내용 -->
             <div id="reflection" class="portfolio-card glass-card rounded-2xl p-6 flex flex-col justify-between hover:-translate-y-1.5 transition-all duration-300 glow-hover cursor-pointer group border-ai-amber/30"
@@ -911,41 +911,22 @@
             },
             7: {
                 badge: "07. OpenAPI 개발",
-                title: "공공데이터 앱 (Air Quality Dashboard)",
+                title: "공공데이터 앱 (부산 축제 가이드)",
                 render: () => `
                     <div class="space-y-4">
                         <p class="text-slate-300">
-                            공공데이터 포털(data.go.kr)의 한국환경공단 실시간 미세먼지 API를 연동하여 양정고 운동장 체육 활동 가능 여부를 알려주는 실시간 대시보드입니다.
+                            공공데이터포털 Open API를 연동하여 부산 16개 구·군의 사계절 축제 및 문화 행사 정보를 실시간으로 조회하고 지도·달력으로 손쉽게 탐색하는 웹 서비스입니다.
                         </p>
 
-                        <!-- Live Interactive Data Simulation Widget -->
-                        <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 space-y-4">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center space-x-2">
-                                    <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    <span class="font-bold text-xs text-slate-200">서울시 양천구 목동 측정소 (실시간)</span>
-                                </div>
-                                <button onclick="simulateApiRefresh()" class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] text-slate-300 hover:text-white flex items-center gap-1">
-                                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> API 새로고침
-                                </button>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-3 text-center">
-                                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                                    <span class="text-xs text-slate-400">미세먼지 (PM10)</span>
-                                    <div id="pm10Val" class="text-2xl font-bold text-emerald-400 mt-1">28 ㎛/㎥</div>
-                                    <span class="text-[10px] text-emerald-400 font-semibold">좋음 😀</span>
-                                </div>
-                                <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                                    <span class="text-xs text-slate-400">초미세먼지 (PM2.5)</span>
-                                    <div id="pm25Val" class="text-2xl font-bold text-emerald-400 mt-1">12 ㎛/㎥</div>
-                                    <span class="text-[10px] text-emerald-400 font-semibold">좋음 😀</span>
-                                </div>
-                            </div>
-
-                            <div id="statusAlert" class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs text-center font-medium">
-                                ✅ 현재 야외 체육 활동 및 운동장 사용에 적합한 상태입니다.
-                            </div>
+                        <div class="p-4 rounded-2xl bg-ai-emerald/10 border border-ai-emerald/20">
+                            <h4 class="font-bold text-ai-emerald text-sm mb-1">🔗 서비스 페이지 이동</h4>
+                            <p class="text-xs text-slate-300 leading-relaxed mb-3">
+                                아래 버튼을 클릭하여 구축된 부산 축제 가이드 웹앱 서비스로 이동합니다.
+                            </p>
+                            <a href="./openapi/index.html" class="inline-flex items-center gap-2 px-4 py-2 bg-ai-emerald text-white rounded-xl font-bold text-xs hover:bg-emerald-600 transition-colors">
+                                <span>부산 축제 가이드 웹앱 열기</span>
+                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                            </a>
                         </div>
                     </div>
                 `
