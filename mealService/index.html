@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>학교 급식 다이어리 - NEIS 식단 조회 서비스</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js (인터랙티브 컴포넌트용) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              bf: '#f59e0b', // Breakfast
+              lu: '#10b981', // Lunch
+              di: '#6366f1', // Dinner
+              warn: '#f43f5e', // Warning
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .word-keep { word-break: keep-all; }
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-hover:hover {
+      background: rgba(51, 65, 85, 0.8);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-white min-h-screen flex flex-col justify-between" x-data="{ selectedAllergy: [1, 5, 6], activeTab: 'daily' }">
+
+  <!-- 헤더 (Navigation) -->
+  <header class="sticky top-0 z-50 glass-card border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- 로고 및 홈 버튼 -->
+      <div class="flex items-center space-x-3">
+        <a href="../index.html" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors group">
+          <div class="p-2 bg-slate-800 rounded-lg group-hover:bg-slate-700 transition-colors">
+            <i data-lucide="home" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <span class="font-bold text-lg hidden sm:inline-block">홈으로</span>
+        </a>
+        <span class="text-slate-600">|</span>
+        <div class="flex items-center space-x-2">
+          <div class="bg-emerald-500/20 p-1.5 rounded-lg border border-emerald-500/30">
+            <i data-lucide="utensils" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+          <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-indigo-400 bg-clip-text text-transparent">
+            학교 급식 다이어리
+          </span>
+          <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">v1.1.0</span>
+        </div>
+      </div>
+
+      <!-- 내비게이션 메뉴 및 앱 실행 버튼 -->
+      <div class="flex items-center space-x-4">
+        <nav class="hidden md:flex space-x-6 text-sm font-medium text-slate-400">
+          <a href="#features" class="hover:text-slate-200 transition-colors">주요기능</a>
+          <a href="#preview" class="hover:text-slate-200 transition-colors">미리보기</a>
+          <a href="#tech" class="hover:text-slate-200 transition-colors">기술스택</a>
+          <a href="#changelog" class="hover:text-slate-200 transition-colors">패치노트</a>
+        </nav>
+        
+        <!-- 앱 실행 버튼 (현재 창 이동) -->
+        <a href="https://meal-service-kwan9.vercel.app/" target="_self" class="inline-flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-semibold shadow-lg shadow-emerald-950/50 hover:shadow-emerald-500/20 transition-all duration-200 scale-100 hover:scale-[1.02] active:scale-[0.98]">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>앱 실행하기</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-16 pb-20 overflow-hidden">
+    <!-- 배경 은은한 오로라 효과 -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-gradient-to-tr from-emerald-600/20 to-indigo-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-sm font-medium mb-6">
+        <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>교육부 NEIS 오픈 API 실시간 연동</span>
+      </div>
+      
+      <h1 class="text-4xl sm:text-6xl font-black text-white tracking-tight word-keep mb-6 leading-tight">
+        오늘 우리 학교 급식,<br class="hidden sm:inline"/>
+        <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400 bg-clip-text text-transparent">스마트하고 안전하게</span> 확인하세요
+      </h1>
+      
+      <p class="max-w-2xl mx-auto text-lg text-slate-400 word-keep mb-10 leading-relaxed">
+        전국 초·중·고등학교 식단 정보부터 맞춤형 알레르기 경고 알림, 원산지 및 영양 정보까지. 학생과 학부모, 교직원을 위한 가장 깔끔한 급식 대시보드.
+      </p>
+
+      <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <a href="https://meal-service-kwan9.vercel.app/" target="_self" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-lg shadow-xl shadow-emerald-500/10 transition-all duration-200 flex items-center justify-center space-x-2">
+          <span>지금 바로 식단 조회하기</span>
+          <i data-lucide="arrow-right" class="w-5 h-5"></i>
+        </a>
+        <a href="#preview" class="w-full sm:w-auto px-8 py-4 rounded-xl glass-card hover:bg-slate-800 text-slate-300 font-semibold text-lg transition-all duration-200 border border-slate-700 flex items-center justify-center space-x-2">
+          <span>기능 미리보기</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Demo Preview Section -->
+  <section id="preview" class="py-12 bg-slate-900/50 border-y border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-10">
+        <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">실시간 인터랙티브 체험</h2>
+        <p class="text-slate-400">아래 데모 UI에서 알레르기 필터를 직접 클릭하여 경고 표시를 체험해보세요.</p>
+      </div>
+
+      <!-- 인터랙티브 체험 박스 -->
+      <div class="glass-card rounded-2xl p-6 sm:p-8 max-w-4xl mx-auto shadow-2xl">
+        
+        <!-- 데모 상단 툴바 -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-800">
+          <div class="flex items-center space-x-3">
+            <div class="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <i data-lucide="school" class="w-5 h-5 text-emerald-400"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-lg">부산 양정고등학교</h3>
+              <p class="text-xs text-slate-400">부산광역시교육청 [C10 - 7150152]</p>
+            </div>
+          </div>
+          
+          <!-- 날짜 배너 -->
+          <div class="flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-sm">
+            <i data-lucide="calendar" class="w-4 h-4 text-emerald-400"></i>
+            <span class="font-medium">2026. 08. 06 (목)</span>
+          </div>
+        </div>
+
+        <!-- 알레르기 체험 토글 버튼들 -->
+        <div class="my-6">
+          <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">알레르기 필터링 테스트 (클릭하여 토글):</span>
+          <div class="flex flex-wrap gap-2">
+            <button @click="selectedAllergy.includes(1) ? selectedAllergy = selectedAllergy.filter(i => i!==1) : selectedAllergy.push(1)" 
+                    :class="selectedAllergy.includes(1) ? 'bg-rose-500/20 text-rose-300 border-rose-500/50' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                    class="px-3 py-1 rounded-full border text-xs font-medium transition-all">
+              ① 난류 <span x-show="selectedAllergy.includes(1)">✓</span>
+            </button>
+            <button @click="selectedAllergy.includes(5) ? selectedAllergy = selectedAllergy.filter(i => i!==5) : selectedAllergy.push(5)" 
+                    :class="selectedAllergy.includes(5) ? 'bg-rose-500/20 text-rose-300 border-rose-500/50' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                    class="px-3 py-1 rounded-full border text-xs font-medium transition-all">
+              ⑤ 대두 <span x-show="selectedAllergy.includes(5)">✓</span>
+            </button>
+            <button @click="selectedAllergy.includes(6) ? selectedAllergy = selectedAllergy.filter(i => i!==6) : selectedAllergy.push(6)" 
+                    :class="selectedAllergy.includes(6) ? 'bg-rose-500/20 text-rose-300 border-rose-500/50' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                    class="px-3 py-1 rounded-full border text-xs font-medium transition-all">
+              ⑥ 밀 <span x-show="selectedAllergy.includes(6)">✓</span>
+            </button>
+            <button @click="selectedAllergy.includes(9) ? selectedAllergy = selectedAllergy.filter(i => i!==9) : selectedAllergy.push(9)" 
+                    :class="selectedAllergy.includes(9) ? 'bg-rose-500/20 text-rose-300 border-rose-500/50' : 'bg-slate-800 text-slate-400 border-slate-700'"
+                    class="px-3 py-1 rounded-full border text-xs font-medium transition-all">
+              ⑨ 돼지고기 <span x-show="selectedAllergy.includes(9)">✓</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 식단 카드 시뮬레이션 (중식 카드 예시) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- 중식 Card -->
+          <div class="bg-slate-900/90 rounded-xl border border-emerald-500/30 overflow-hidden shadow-lg">
+            <div class="bg-emerald-500/10 border-b border-emerald-500/20 px-4 py-3 flex justify-between items-center">
+              <div class="flex items-center space-x-2">
+                <i data-lucide="sun" class="w-4 h-4 text-emerald-400"></i>
+                <span class="font-bold text-emerald-400">중식 (점심)</span>
+              </div>
+              <span class="text-xs text-slate-400 font-mono">824.5 kcal</span>
+            </div>
+            <div class="p-4 space-y-2 text-sm">
+              <div class="flex justify-between items-center py-1 border-b border-slate-800/60">
+                <span class="text-slate-200">친환경 발아현미밥</span>
+                <span class="text-xs text-slate-500"></span>
+              </div>
+              
+              <!-- 알레르기 감지 항목 예시 1 -->
+              <div class="flex justify-between items-center py-1 border-b border-slate-800/60"
+                   :class="selectedAllergy.includes(5) || selectedAllergy.includes(6) ? 'bg-rose-500/10 -mx-2 px-2 rounded border-l-2 border-rose-500' : ''">
+                <span class="text-slate-200 word-keep">돈육김치찌개</span>
+                <div class="flex items-center space-x-1">
+                  <template x-if="selectedAllergy.includes(5) || selectedAllergy.includes(6) || selectedAllergy.includes(9)">
+                    <span class="bg-rose-500/20 text-rose-400 text-[10px] px-1.5 py-0.5 rounded font-bold">경고</span>
+                  </template>
+                  <span class="text-xs text-slate-500 font-mono">5.6.9.10</span>
+                </div>
+              </div>
+
+              <!-- 알레르기 감지 항목 예시 2 -->
+              <div class="flex justify-between items-center py-1 border-b border-slate-800/60"
+                   :class="selectedAllergy.includes(1) || selectedAllergy.includes(5) || selectedAllergy.includes(6) ? 'bg-rose-500/10 -mx-2 px-2 rounded border-l-2 border-rose-500' : ''">
+                <span class="text-slate-200 word-keep">수제 계란말이</span>
+                <div class="flex items-center space-x-1">
+                  <template x-if="selectedAllergy.includes(1) || selectedAllergy.includes(5) || selectedAllergy.includes(6)">
+                    <span class="bg-rose-500/20 text-rose-400 text-[10px] px-1.5 py-0.5 rounded font-bold">경고</span>
+                  </template>
+                  <span class="text-xs text-slate-500 font-mono">1.2.5.6</span>
+                </div>
+              </div>
+
+              <div class="flex justify-between items-center py-1 border-b border-slate-800/60">
+                <span class="text-slate-200 word-keep">깍두기</span>
+                <span class="text-xs text-slate-500 font-mono">9</span>
+              </div>
+              <div class="flex justify-between items-center py-1">
+                <span class="text-slate-200 word-keep">유기농 청포도 에이드</span>
+                <span class="text-xs text-slate-500 font-mono">13</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 카드 설명 우측 -->
+          <div class="flex flex-col justify-center space-y-4 p-2">
+            <div class="flex items-start space-x-3">
+              <div class="p-2 bg-rose-500/10 rounded-lg text-rose-400 mt-1">
+                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-white">실시간 알레르기 모니터링</h4>
+                <p class="text-sm text-slate-400 word-keep">선택한 알레르기 번호가 급식에 포함되어 있으면 붉은색 경고 배지와 강조 효과로 위험을 사전에 방지합니다.</p>
+              </div>
+            </div>
+
+            <div class="flex items-start space-x-3">
+              <div class="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 mt-1">
+                <i data-lucide="wrap-text" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="font-bold text-white">한글 가독성 최적화 (`break-keep`)</h4>
+                <p class="text-sm text-slate-400 word-keep">단어 단위 줄바꿈을 적용하여 메뉴명이 어색하게 끊기지 않고 가독성이 뛰어납니다.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Key Features Grid Section -->
+  <section id="features" class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs font-semibold uppercase tracking-widest text-emerald-400 mb-2">Key Features</h2>
+        <p class="text-3xl font-bold text-white tracking-tight">학교 급식 다이어리의 스마트한 주요 기능</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Feature 1 -->
+        <div class="glass-card glass-card-hover p-6 rounded-2xl transition-all duration-200">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between p-3 mb-6">
+            <i data-lucide="utensils" class="w-6 h-6 text-amber-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">아침·점심·저녁 구분 카드</h3>
+          <p class="text-slate-400 text-sm leading-relaxed word-keep">
+            조식(Amber), 중식(Emerald), 석식(Indigo)으로 명확히 구분된 테마 컬러 카드를 통해 시간대별 급식을 직관적으로 한눈에 확인할 수 있습니다.
+          </p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="glass-card glass-card-hover p-6 rounded-2xl transition-all duration-200">
+          <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-between p-3 mb-6">
+            <i data-lucide="search" class="w-6 h-6 text-emerald-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">전국 학교 검색 & 즐겨찾기</h3>
+          <p class="text-slate-400 text-sm leading-relaxed word-keep">
+            교육부 NEIS API를 직접 조회하여 전국 초·중·고·특수학교를 검색하고, 자주 가는 학교를 로컬스토리지에 저장하여 1초 만에 전환합니다.
+          </p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="glass-card glass-card-hover p-6 rounded-2xl transition-all duration-200">
+          <div class="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-between p-3 mb-6">
+            <i data-lucide="alert-triangle" class="w-6 h-6 text-rose-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">1~19번 식약처 알레르기 필터</h3>
+          <p class="text-slate-400 text-sm leading-relaxed word-keep">
+            난류, 우유, 대두, 돼지고기 등 식약처 지정 19가지 알레르기 유발 성분을 개인 맞춤으로 등록하고 위험 메뉴 배지 알림을 받으세요.
+          </p>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="glass-card glass-card-hover p-6 rounded-2xl transition-all duration-200">
+          <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between p-3 mb-6">
+            <i data-lucide="calendar-days" class="w-6 h-6 text-indigo-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">월별 급식 달력 (Calendar)</h3>
+          <p class="text-slate-400 text-sm leading-relaxed word-keep">
+            월 단위 급식 현황을 달력 뷰로 조망하고, 날짜 클릭 시 해당 일자의 상세 일별 식단 뷰로 즉시 연동되어 한달 식단을 쉽게 파악합니다.
+          </p>
+        </div>
+
+        <!-- Feature 5 -->
+        <div class="glass-card glass-card-hover p-6 rounded-2xl transition-all duration-200">
+          <div class="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-between p-3 mb-6">
+            <i data-lucide="file-text" class="w-6 h-6 text-teal-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">원산지 & 영양성분 아코디언</h3>
+          <p class="text-slate-400 text-sm leading-relaxed word-keep">
+            각 식단별 세부 원산지 표기와 탄수화물, 단백질, 칼슘 등 상세 영양 정보 및 총 칼로리를 깔끔한 아코디언 접이식 메뉴로 제공합니다.
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="glass-card glass-card-hover p-6 rounded-2xl transition-all duration-200">
+          <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-between p-3 mb-6">
+            <i data-lucide="share-2" class="w-6 h-6 text-purple-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">원클릭 텍스트 복사 & 공유</h3>
+          <p class="text-slate-400 text-sm leading-relaxed word-keep">
+            메신저나 메일로 일별 식단을 간편하게 전송할 수 있도록 메인 클립보드 공유용 텍스트 복사 버튼을 내장했습니다.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack Section -->
+  <section id="tech" class="py-16 bg-slate-900/30 border-t border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-xs font-semibold uppercase tracking-widest text-emerald-400 mb-2">Tech Architecture</h2>
+        <p class="text-2xl font-bold text-white">기술 스택 & 데이터 흐름</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div class="glass-card p-5 rounded-xl">
+          <div class="font-mono text-emerald-400 font-bold text-lg mb-1">React 18</div>
+          <div class="text-slate-400 text-xs">TypeScript & Vite</div>
+        </div>
+        <div class="glass-card p-5 rounded-xl">
+          <div class="font-mono text-teal-400 font-bold text-lg mb-1">Tailwind CSS</div>
+          <div class="text-slate-400 text-xs">Responsive & Dark Theme</div>
+        </div>
+        <div class="glass-card p-5 rounded-xl">
+          <div class="font-mono text-indigo-400 font-bold text-lg mb-1">NEIS API</div>
+          <div class="text-slate-400 text-xs">Open API Realtime Fetch</div>
+        </div>
+        <div class="glass-card p-5 rounded-xl">
+          <div class="font-mono text-amber-400 font-bold text-lg mb-1">LocalStorage</div>
+          <div class="text-slate-400 text-xs">School & Allergy Preferences</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Changelog Section -->
+  <section id="changelog" class="py-16">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold text-white mb-8 flex items-center space-x-2">
+        <i data-lucide="history" class="w-6 h-6 text-emerald-400"></i>
+        <span>버전별 변경 이력 (Changelog)</span>
+      </h2>
+
+      <div class="space-y-6 relative border-l-2 border-slate-800 pl-6 ml-3">
+        <!-- v1.1.0 -->
+        <div class="relative">
+          <div class="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-slate-950"></div>
+          <div class="flex items-center space-x-3 mb-1">
+            <span class="text-lg font-bold text-white">v1.1.0</span>
+            <span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">Latest</span>
+          </div>
+          <ul class="list-disc list-inside text-sm text-slate-300 space-y-1">
+            <li>급식 카드 가로 넓이 확장 및 Layout 최적화 (`max-w-7xl`, 1~3개 식단 카드 반응형 그리드).</li>
+            <li>메뉴명 한국어 단어 미자름 처리 (`break-keep`) 적용하여 가독성 개선.</li>
+            <li>`PRD.md` 명세서 정립 및 설명 랜딩페이지 제작.</li>
+          </ul>
+        </div>
+
+        <!-- v1.0.0 -->
+        <div class="relative">
+          <div class="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-slate-700 ring-4 ring-slate-950"></div>
+          <div class="flex items-center space-x-3 mb-1">
+            <span class="text-lg font-bold text-white">v1.0.0</span>
+          </div>
+          <ul class="list-disc list-inside text-sm text-slate-400 space-y-1">
+            <li>기본 학교 검색, 일별/월별 급식 조회 및 알레르기 연동 서비스 런칭.</li>
+            <li>기본 설정 학교 지정 (부산 양정고등학교: `C10`, `7150152`).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="py-16 bg-gradient-to-r from-emerald-900/40 via-slate-900 to-indigo-900/40 border-t border-slate-800">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+      <h2 class="text-3xl font-extrabold text-white mb-4">지금 우리 학교 급식을 확인해보세요!</h2>
+      <p class="text-slate-300 mb-8 max-w-xl mx-auto text-sm sm:text-base">별도의 회원가입 없이 바로 학교를 검색하여 오늘 식단을 조회하실 수 있습니다.</p>
+      
+      <!-- 현재 창에서 서비스로 이동하는 메인 버튼 -->
+      <a href="https://meal-service-kwan9.vercel.app/" target="_self" class="inline-flex items-center space-x-3 px-8 py-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-lg shadow-xl shadow-emerald-500/20 transition-all transform hover:-translate-y-0.5">
+        <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+        <span>학교 급식 다이어리 시작하기</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-950 py-8 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div>
+        <p>© 2026 학교 급식 다이어리 (NEIS Meal Service Diary). All rights reserved.</p>
+        <p class="mt-1 text-slate-600">본 서비스는 교육부 나이스(NEIS) 오픈 API의 데이터를 바탕으로 제공됩니다.</p>
+      </div>
+      <div class="flex space-x-4">
+        <a href="../index.html" class="hover:text-slate-300 transition-colors">홈으로</a>
+        <span>•</span>
+        <a href="https://meal-service-kwan9.vercel.app/" target="_self" class="hover:text-slate-300 transition-colors">웹 앱 바로가기</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lucide Icons Render Script -->
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
