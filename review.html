@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>인공지능 일반 · 성찰 노트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0d13;
+    --bg-elev: #10141d;
+    --bg-elev-2: #161b26;
+    --line: #232b3a;
+    --text: #e9edf5;
+    --text-dim: #8a93a8;
+    --text-faint: #565f72;
+
+    --c-ethics: #5b8def;
+    --c-media: #a78bfa;
+    --c-data: #34d399;
+    --c-career: #f5a524;
+    --c-local: #f87171;
+    --c-school: #2dd4bf;
+    --c-openapi: #4ade80;
+    --c-final: #f5a524;
+
+    --serif-num: 'Space Grotesk', sans-serif;
+    --sans: 'Noto Sans KR', sans-serif;
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x:hidden;
+  }
+
+  body::before{
+    content:'';
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -5%, rgba(91,141,239,0.10), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 90% 15%, rgba(167,139,250,0.08), transparent 60%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  a{ color:inherit; text-decoration:none; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    position:fixed; top:0; left:0; right:0; z-index:100;
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 28px;
+    background: rgba(10,13,19,0.72);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .home-btn{
+    display:flex; align-items:center; gap:8px;
+    font-size: 13px; font-weight:500; color: var(--text-dim);
+    padding: 8px 14px; border-radius: 100px;
+    border: 1px solid var(--line);
+    transition: all .25s ease;
+  }
+  .home-btn:hover{
+    color: var(--text); border-color: var(--c-ethics);
+    background: rgba(91,141,239,0.08);
+    transform: translateX(-2px);
+  }
+  .home-btn svg{ width:14px; height:14px; }
+  .topbar-title{
+    font-size: 12px; letter-spacing: 0.12em; color: var(--text-faint);
+    font-family: var(--serif-num); text-transform: uppercase;
+  }
+
+  /* ---------- progress rail ---------- */
+  .rail{
+    position: fixed; left: 32px; top: 50%; transform: translateY(-50%);
+    z-index: 90; display:flex; flex-direction:column; gap:14px;
+  }
+  .rail-dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--line);
+    transition: all .3s ease;
+    cursor:pointer;
+  }
+  .rail-dot.active{
+    background: var(--dot-color, var(--c-ethics));
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot-color, var(--c-ethics)) 20%, transparent);
+    transform: scale(1.3);
+  }
+  @media (max-width: 900px){ .rail{ display:none; } }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative; z-index:1;
+    min-height: 92vh;
+    display:flex; flex-direction:column; justify-content:center;
+    padding: 120px 10vw 60px;
+  }
+  .eyebrow{
+    font-family: var(--serif-num);
+    font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase;
+    color: var(--c-ethics);
+    margin-bottom: 22px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .eyebrow::before{
+    content:''; width:28px; height:1px; background: var(--c-ethics);
+  }
+  .hero h1{
+    font-size: clamp(34px, 6vw, 68px);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    max-width: 15ch;
+  }
+  .hero h1 em{
+    font-style: normal;
+    background: linear-gradient(90deg, var(--c-ethics), var(--c-media));
+    -webkit-background-clip: text; background-clip:text; color:transparent;
+  }
+  .hero p{
+    margin-top: 26px; max-width: 46ch;
+    color: var(--text-dim); font-size: 16px;
+  }
+  .hero-meta{
+    margin-top: 48px; display:flex; gap: 36px; flex-wrap:wrap;
+  }
+  .hero-meta div{ font-family: var(--serif-num); }
+  .hero-meta .num{ font-size: 26px; font-weight:700; color: var(--text); }
+  .hero-meta .lab{ font-size: 11px; color: var(--text-faint); letter-spacing:.08em; margin-top:2px; }
+
+  .scroll-cue{
+    position:absolute; bottom: 36px; left: 10vw;
+    font-size: 11px; color: var(--text-faint); letter-spacing:.1em;
+    display:flex; align-items:center; gap:10px;
+    animation: bob 2.2s ease-in-out infinite;
+  }
+  .scroll-cue .ln{ width:1px; height:26px; background: linear-gradient(var(--text-faint), transparent); }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(6px);} }
+
+  /* ---------- section shell ---------- */
+  section{ position:relative; z-index:1; padding: 40px 10vw; }
+  .section-head{ max-width: 640px; margin: 0 auto 56px; text-align:left; }
+  .section-head .tag{
+    font-family: var(--serif-num); font-size:12px; letter-spacing:.18em;
+    color: var(--text-faint); text-transform:uppercase; margin-bottom:10px; display:block;
+  }
+  .section-head h2{ font-size: clamp(24px,3.4vw,34px); font-weight:900; letter-spacing:-0.01em; }
+  .section-head p{ margin-top:12px; color: var(--text-dim); font-size:15px; }
+
+  /* ---------- timeline ---------- */
+  .timeline{
+    max-width: 760px; margin: 0 auto;
+    position: relative;
+  }
+  .timeline::before{
+    content:'';
+    position:absolute; left: 27px; top:8px; bottom: 8px; width:2px;
+    background: linear-gradient(var(--line), var(--line));
+  }
+  .t-item{
+    position:relative; padding-left: 76px; padding-bottom: 46px;
+    opacity:0; transform: translateY(24px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .t-item.in{ opacity:1; transform:none; }
+  .t-item:last-child{ padding-bottom:0; }
+
+  .t-node{
+    position:absolute; left:14px; top:2px;
+    width: 28px; height:28px; border-radius:50%;
+    background: var(--bg-elev);
+    border: 2px solid var(--dot-color);
+    display:flex; align-items:center; justify-content:center;
+    font-family: var(--serif-num); font-size:11px; font-weight:700;
+    color: var(--dot-color);
+    z-index:2;
+    transition: box-shadow .3s ease, transform .3s ease;
+  }
+  .t-item.in .t-node{ box-shadow: 0 0 0 6px color-mix(in srgb, var(--dot-color) 12%, transparent); }
+
+  .t-card{
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 22px 24px;
+    cursor:pointer;
+    transition: border-color .25s ease, background .25s ease, transform .2s ease;
+  }
+  .t-card:hover{ border-color: color-mix(in srgb, var(--dot-color) 55%, var(--line)); transform: translateY(-2px); }
+
+  .t-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    font-family: var(--serif-num); font-size:11px; letter-spacing:.06em;
+    color: var(--dot-color);
+    background: color-mix(in srgb, var(--dot-color) 14%, transparent);
+    border-radius: 100px; padding: 4px 10px; margin-bottom:12px;
+  }
+  .t-title{ font-size:19px; font-weight:700; margin-bottom:8px; }
+  .t-desc{ color: var(--text-dim); font-size:14px; line-height:1.7; }
+  .t-tags{ margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+  .t-tags span{
+    font-size:12px; color: var(--text-faint);
+    border:1px solid var(--line); padding:3px 9px; border-radius:100px;
+  }
+  .t-toggle{
+    margin-top:14px; font-size:12px; color: var(--dot-color);
+    display:flex; align-items:center; gap:6px; font-weight:500;
+  }
+  .t-toggle svg{ width:12px; height:12px; transition: transform .25s ease; }
+  .t-card.open .t-toggle svg{ transform: rotate(180deg); }
+
+  .t-extra{
+    max-height:0; overflow:hidden;
+    transition: max-height .35s ease, margin-top .35s ease;
+  }
+  .t-card.open .t-extra{ max-height: 200px; margin-top:14px; }
+  .t-extra-inner{
+    border-top: 1px dashed var(--line); padding-top:14px;
+    font-size: 13.5px; color: var(--text-dim);
+  }
+
+  /* struggle node special wiring */
+  .t-item[data-key="openapi"] .t-node{ position:relative; }
+  .t-item[data-key="openapi"] .t-card:hover .t-node,
+  .t-item[data-key="openapi"].in .t-node{
+    animation: flicker 2.6s ease-in-out infinite;
+  }
+  @keyframes flicker{
+    0%,100%{ box-shadow: 0 0 0 6px color-mix(in srgb, var(--dot-color) 12%, transparent); }
+    45%{ box-shadow: 0 0 0 2px transparent; }
+    55%{ box-shadow: 0 0 0 2px transparent; }
+    60%{ box-shadow: 0 0 0 8px color-mix(in srgb, var(--dot-color) 22%, transparent); }
+  }
+
+  /* success node special ring */
+  .t-item[data-key="career"] .t-node{
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--dot-color) 16%, transparent), 0 0 22px color-mix(in srgb, var(--dot-color) 45%, transparent);
+  }
+
+  /* ---------- reflection callouts (08) ---------- */
+  .callouts{
+    max-width: 900px; margin: 0 auto;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  @media (max-width: 760px){ .callouts{ grid-template-columns: 1fr; } }
+
+  .callout{
+    border-radius: 16px; padding: 28px 26px;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    position:relative; overflow:hidden;
+  }
+  .callout::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  }
+  .callout.good::before{ background: linear-gradient(90deg, var(--c-career), var(--c-data)); }
+  .callout.hard::before{ background: linear-gradient(90deg, var(--c-openapi), var(--c-local)); }
+
+  .callout .k-icon{
+    width:38px; height:38px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    margin-bottom:18px; font-size:18px;
+  }
+  .callout.good .k-icon{ background: color-mix(in srgb, var(--c-career) 18%, transparent); color: var(--c-career); }
+  .callout.hard .k-icon{ background: color-mix(in srgb, var(--c-openapi) 18%, transparent); color: var(--c-openapi); }
+
+  .callout h3{ font-size: 18px; margin-bottom: 12px; }
+  .callout p{ color: var(--text-dim); font-size: 14.5px; margin-bottom: 10px; }
+  .callout p:last-child{ margin-bottom:0; }
+  .callout .quote{
+    margin-top: 14px; padding: 12px 14px; border-left: 2px solid var(--line);
+    color: var(--text-faint); font-size: 13px; font-style: normal;
+  }
+  .callout.hard .quote{ border-left-color: var(--c-openapi); }
+  .callout.good .quote{ border-left-color: var(--c-career); }
+
+  .fix-log{
+    margin-top:16px; display:flex; flex-direction:column; gap:8px;
+  }
+  .fix-log .row{
+    display:flex; align-items:flex-start; gap:10px; font-size:13px; color: var(--text-dim);
+  }
+  .fix-log .row .dot{
+    width:6px; height:6px; border-radius:50%; margin-top:6px; flex-shrink:0;
+  }
+  .fix-log .row.bad .dot{ background: var(--c-local); }
+  .fix-log .row.ok .dot{ background: var(--c-data); }
+
+  /* ---------- thanks ---------- */
+  .thanks-grid{
+    max-width: 900px; margin: 0 auto;
+    display:grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  @media (max-width: 760px){ .thanks-grid{ grid-template-columns: 1fr; } }
+  .thanks-card{
+    background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev));
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 30px 26px;
+  }
+  .thanks-card .to{
+    font-family: var(--serif-num); font-size:11px; letter-spacing:.14em;
+    color: var(--text-faint); text-transform:uppercase; margin-bottom:10px;
+  }
+  .thanks-card h3{ font-size:20px; margin-bottom:14px; }
+  .thanks-card p{ color: var(--text-dim); font-size: 14.5px; }
+  .thanks-card .sign{
+    margin-top: 20px; font-size:13px; color: var(--text-faint);
+    display:flex; align-items:center; gap:8px;
+  }
+  .thanks-card .sign::before{ content:''; width:20px; height:1px; background: var(--text-faint); }
+
+  /* ---------- footer ---------- */
+  footer{
+    text-align:center; padding: 70px 10vw 60px;
+    color: var(--text-faint); font-size:13px;
+    position:relative; z-index:1;
+  }
+  footer .big{
+    font-family: var(--serif-num); font-size: clamp(20px,3vw,28px);
+    color: var(--text); font-weight:600; margin-bottom:16px;
+  }
+  footer a.foot-home{
+    display:inline-flex; align-items:center; gap:8px; margin-top:24px;
+    color: var(--c-ethics); font-size:13px; font-weight:500;
+    border:1px solid var(--line); padding:9px 16px; border-radius:100px;
+    transition: all .25s ease;
+  }
+  footer a.foot-home:hover{ border-color: var(--c-ethics); background: rgba(91,141,239,0.08); }
+
+  ::selection{ background: var(--c-ethics); color:#fff; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="home-btn" href="../index.html" aria-label="홈으로 이동">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+    홈으로
+  </a>
+  <span class="topbar-title">AI General · Reflection</span>
+</div>
+
+<div class="rail" id="rail"></div>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="eyebrow">Semester Journey · 01–08</span>
+  <h1>인공지능 일반,<br><em>8개의 프로젝트</em>로<br>남긴 한 학기</h1>
+  <p>방학 동안 진행한 '인공지능 일반' 교과목의 여정을 되짚어봅니다. 윤리 가이드라인부터 진로 탐색, 지역사회 문제 해결, 그리고 실제 공공데이터 API를 붙여본 웹 서비스까지 — 배움의 흔적을 정리한 성찰 기록입니다.</p>
+  <div class="hero-meta">
+    <div><div class="num">08</div><div class="lab">PROJECTS</div></div>
+    <div><div class="num">1</div><div class="lab">SEMESTER</div></div>
+    <div><div class="num">∞</div><div class="lab">TRIAL & ERROR</div></div>
+  </div>
+  <div class="scroll-cue"><div class="ln"></div>SCROLL</div>
+</div>
+
+<!-- TIMELINE -->
+<section id="timeline-section">
+  <div class="section-head">
+    <span class="tag">Chapter 01–07</span>
+    <h2>여정의 기록</h2>
+    <p>각 카드를 눌러 프로젝트별 짧은 회고를 확인할 수 있어요.</p>
+  </div>
+
+  <div class="timeline" id="timeline">
+
+    <div class="t-item" data-key="ethics" style="--dot-color:var(--c-ethics)">
+      <div class="t-node">01</div>
+      <div class="t-card">
+        <span class="t-badge">AI 윤리</span>
+        <div class="t-title">생성형 AI 활용 원칙</div>
+        <p class="t-desc">책임감 있고 올바른 생성형 AI 활용을 위한 5대 윤리 가이드라인을 작성하고, 결과물을 검증하기 위한 팩트체크 가이드라인을 함께 수립했다.</p>
+        <div class="t-tags"><span>#AI윤리</span><span>#가이드라인</span><span>#팩트체크</span></div>
+        <div class="t-toggle">회고 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="t-extra"><div class="t-extra-inner">"AI를 어떻게 써야 하는가"를 스스로 정의해본 첫 과제. 이후 모든 프로젝트에서 프롬프트를 검토하는 기준이 되었다.</div></div>
+      </div>
+    </div>
+
+    <div class="t-item" data-key="media" style="--dot-color:var(--c-media)">
+      <div class="t-node">02</div>
+      <div class="t-card">
+        <span class="t-badge">AI 멀티미디어</span>
+        <div class="t-title">AI 스토리와 영상</div>
+        <p class="t-desc">부산대 정컴 입학부터 바이브 코딩 기술을 기반으로 개발 커리어를 쌓아나가는 나만의 시네마틱 성공 스토리북을 기획했다.</p>
+        <div class="t-tags"><span>#시네마틱</span><span>#스토리북</span><span>#바이브코딩</span></div>
+        <div class="t-toggle">회고 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="t-extra"><div class="t-extra-inner">막연했던 미래 모습을 이야기 형식으로 그려보니, 목표가 훨씬 구체적으로 느껴졌다.</div></div>
+      </div>
+    </div>
+
+    <div class="t-item" data-key="data" style="--dot-color:var(--c-data)">
+      <div class="t-node">03</div>
+      <div class="t-card">
+        <span class="t-badge">데이터 탐구</span>
+        <div class="t-title">진로 데이터 분석</div>
+        <p class="t-desc">'AI 시대의 이동관' 역량 진단 보고서. SW 개발 능력, 인공지능 윤리관, 데이터 해석력 등 5가지 핵심 지표를 레이더 차트로 진단하고 10년 로드맵을 그렸다.</p>
+        <div class="t-tags"><span>#역량레이더</span><span>#10년로드맵</span><span>#AI서비스기획자</span></div>
+        <div class="t-toggle">회고 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="t-extra"><div class="t-extra-inner">숫자로 내 역량을 마주하는 게 조금 두려웠지만, 부족한 지표를 명확히 알게 된 계기였다.</div></div>
+      </div>
+    </div>
+
+    <div class="t-item" data-key="career" style="--dot-color:var(--c-career)">
+      <div class="t-node">04</div>
+      <div class="t-card">
+        <span class="t-badge">★ 커리어 플랜 · 잘된 점</span>
+        <div class="t-title">나의 진로 리포트</div>
+        <p class="t-desc">부산대학교 정보컴퓨터공학부의 인공지능전공과 컴퓨터공학전공의 커리큘럼과 진로 방향을 심층 비교 분석하여, 내 적성에 맞는 전공을 탐색했다.</p>
+        <div class="t-tags"><span>#부산대정컴</span><span>#인공지능전공</span><span>#컴퓨터공학전공</span></div>
+        <div class="t-toggle">회고 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="t-extra"><div class="t-extra-inner">8개 프로젝트 중 가장 만족스러운 결과물. 아래 '08. 종합 성찰'에서 더 자세히 다룬다.</div></div>
+      </div>
+    </div>
+
+    <div class="t-item" data-key="local" style="--dot-color:var(--c-local)">
+      <div class="t-node">05</div>
+      <div class="t-card">
+        <span class="t-badge">지역사회 탐구</span>
+        <div class="t-title">지역 문제 데이터 분석</div>
+        <p class="t-desc">전국 어린이 보호구역 표준 데이터를 바탕으로, 단순 조회를 넘어 구역별 F~S급 안전 등급을 매겨 시각화한 안전 지도 서비스를 만들었다.</p>
+        <div class="t-tags"><span>#어린이보호구역</span><span>#F5등급제</span><span>#안전지도</span></div>
+        <div class="t-toggle">회고 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="t-extra"><div class="t-extra-inner">공공데이터를 등급이라는 직관적인 지표로 바꾸니 훨씬 이해하기 쉬운 서비스가 됐다.</div></div>
+      </div>
+    </div>
+
+    <div class="t-item" data-key="school" style="--dot-color:var(--c-school)">
+      <div class="t-node">06</div>
+      <div class="t-card">
+        <span class="t-badge">교내 문제 해결</span>
+        <div class="t-title">학교 급식 다이어리</div>
+        <p class="t-desc">교육부 나이스(NEIS) Open API와 연동해 전국 학교의 일별·월별 급식 식단과 영양 정보, 원산지, 맞춤형 알레르기 경고 기능을 제공하는 웹 서비스를 만들었다.</p>
+        <div class="t-tags"><span>#나이스API</span><span>#급식식단</span><span>#알레르기필터</span></div>
+        <div class="t-toggle">회고 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="t-extra"><div class="t-extra-inner">처음으로 외부 공공 API를 다뤄본 프로젝트. 다음 07번 프로젝트의 발판이 되었다.</div></div>
+      </div>
+    </div>
+
+    <div class="t-item" data-key="openapi" style="--dot-color:var(--c-openapi)">
+      <div class="t-node">07</div>
+      <div class="t-card">
+        <span class="t-badge">⚡ OpenAPI 개발 · 어려웠던 점</span>
+        <div class="t-title">공공데이터 앱 (부산 축제 가이드)</div>
+        <p class="t-desc">공공데이터포털 Open API를 연동해 부산 16개 구·군의 사계절 축제와 문화 행사 정보를 실시간으로 조회하고, 지도·달력으로 탐색하는 웹 서비스를 만들었다.</p>
+        <div class="t-tags"><span>#부산축제가이드</span><span>#공공데이터API</span><span>#지도및달력뷰</span></div>
+        <div class="t-toggle">회고 보기 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></div>
+        <div class="t-extra"><div class="t-extra-inner">배포 환경에서 API 키를 계속 읽지 못해 가장 오래 붙잡고 있던 프로젝트. 자세한 과정은 아래 '08. 종합 성찰'에서.</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- REFLECTION -->
+<section id="reflect">
+  <div class="section-head">
+    <span class="tag">Chapter 08</span>
+    <h2>종합 성찰</h2>
+    <p>1~7번 프로젝트를 지나며 가장 뿌듯했던 순간과 가장 힘들었던 순간을 남겨둔다.</p>
+  </div>
+
+  <div class="callouts">
+    <div class="callout good">
+      <div class="k-icon">🎯</div>
+      <h3>잘됐던 점 — 나의 진로 리포트</h3>
+      <p>8개 프로젝트 중 가장 결과물이 잘 나온 건 04번, <strong>부산대 컴퓨터공학부의 인공지능전공과 컴퓨터공학전공을 비교</strong>한 진로 리포트였다.</p>
+      <p>단순히 학과 소개를 나열하는 데 그치지 않고, 대학알리미 등 공시 데이터를 직접 찾아 경쟁률, 학비, 1인당 교육비 같은 실제 수치까지 비교에 반영하다 보니 막연했던 전공 선택 고민이 실제로 정리되는 느낌을 받았다.</p>
+      <div class="quote">"내가 궁금했던 질문에 진짜 답을 찾은 프로젝트."</div>
+    </div>
+
+    <div class="callout hard">
+      <div class="k-icon">🛠️</div>
+      <h3>어려웠던 점 — 부산 축제 가이드의 API 키</h3>
+      <p>07번 부산 축제 가이드를 만들 때, Open API 키를 계속 못 읽어와서 한참을 헤맸다. 처음엔 내가 환경변수를 잘못 넣은 줄 알았다.</p>
+      <p>알고 보니 원인은 <strong>AI가 Vercel 배포 환경에 맞지 않는 방식으로 코드를 작성</strong>해준 것이었다. 프롬프트에 "Vercel 환경에 맞게 작성해줘"라고 다시 명확히 요청하니 그제서야 정상적으로 작동했다.</p>
+      <div class="fix-log">
+        <div class="row bad"><span class="dot"></span>로컬에서는 되는데 배포하면 API 키를 못 읽어옴 → 환경변수 문제로 오해</div>
+        <div class="row bad"><span class="dot"></span>원인은 Vercel 환경에 맞지 않게 작성된 코드였음</div>
+        <div class="row ok"><span class="dot"></span>"Vercel 배포에 맞게 작성해줘"라고 다시 요청 → 정상 작동</div>
+      </div>
+      <div class="quote">배포 환경마다 코드 작성 방식이 다를 수 있다는 걸 몸으로 배운 순간.</div>
+    </div>
+  </div>
+</section>
+
+<!-- THANKS -->
+<section id="thanks">
+  <div class="section-head">
+    <span class="tag">With Gratitude</span>
+    <h2>감사 인사</h2>
+    <p>혼자였다면 끝까지 오지 못했을 여정, 도와주신 분들께 남기는 짧은 인사.</p>
+  </div>
+
+  <div class="thanks-grid">
+    <div class="thanks-card">
+      <div class="to">To. 조교님들</div>
+      <h3>막혔던 순간마다, 감사했습니다</h3>
+      <p>부산 축제 가이드 앱의 API 키 문제로 헤맬 때 옆에서 함께 원인을 짚어주시고 방향을 잡아주신 덕분에 끝까지 완성할 수 있었습니다. 조교님들의 도움이 없었다면 07번 프로젝트는 끝내 미완성으로 남았을 거예요.</p>
+      <div class="sign">이동관 드림</div>
+    </div>
+    <div class="thanks-card">
+      <div class="to">To. 교수님</div>
+      <h3>한 학기 동안 이끌어주셔서 감사합니다</h3>
+      <p>'인공지능 일반' 수업을 통해 AI를 단순한 도구가 아니라 윤리적으로, 또 깊이 있게 다루는 법을 배울 수 있었습니다. 8개의 프로젝트를 거치며 성장한 한 학기, 진심으로 감사드립니다.</p>
+      <p>다음에도 기회가 된다면 교수님 강좌를 또 수강하고 싶습니다.</p>
+      <div class="sign">이동관 드림</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="big">여기까지가, 한 학기의 기록입니다.</div>
+  다음 학기에는 또 어떤 프로젝트로 성장해 있을지 기대하며.
+  <br>
+  <a class="foot-home" href="../index.html">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+    홈으로 돌아가기
+  </a>
+</footer>
+
+<script>
+  // reveal timeline items on scroll
+  const items = document.querySelectorAll('.t-item');
+  const rail = document.getElementById('rail');
+
+  items.forEach((item, i) => {
+    const color = getComputedStyle(item).getPropertyValue('--dot-color').trim();
+    const dot = document.createElement('div');
+    dot.className = 'rail-dot';
+    dot.style.setProperty('--dot-color', color);
+    dot.addEventListener('click', () => item.scrollIntoView({behavior:'smooth', block:'center'}));
+    rail.appendChild(dot);
+  });
+  const railDots = document.querySelectorAll('.rail-dot');
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const idx = [...items].indexOf(entry.target);
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        railDots.forEach(d => d.classList.remove('active'));
+        if (railDots[idx]) railDots[idx].classList.add('active');
+      }
+    });
+  }, { threshold: 0.4 });
+
+  items.forEach(item => io.observe(item));
+
+  // accordion toggle
+  document.querySelectorAll('.t-card').forEach(card => {
+    card.addEventListener('click', () => {
+      card.classList.toggle('open');
+    });
+  });
+</script>
+
+</body>
+</html>
